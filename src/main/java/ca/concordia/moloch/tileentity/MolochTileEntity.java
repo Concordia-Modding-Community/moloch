@@ -152,7 +152,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
             for(int i = 1; i < INVENTORY_SIZE; i++) {
                 ItemStack targetItem = contents.get(i);
     
-                if(playerItem.isItemEqual(targetItem) && playerItem.getCount() == targetItem.getCount()) {
+                if(playerItem.isItemEqual(targetItem) && playerItem.getCount() >= targetItem.getCount()) {
                     playerItem.setCount(playerItem.getCount() - targetItem.getCount());
 
                     targetItem.setCount(Math.min(targetItem.getMaxStackSize(), targetItem.getCount() + 1));
