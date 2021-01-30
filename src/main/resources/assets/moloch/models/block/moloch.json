@@ -1,6 +1,12 @@
 {
-    "parent": "block/cube_all",
+    "parent": "block/cube",
     "textures": {
-        "all": "minecraft:block/chest"
+        "particle": "moloch:block/moloch_heart_top",
+        "up": "moloch:block/moloch_heart_top",
+        "west": "moloch:block/moloch_heart_side",
+        "east": "moloch:block/moloch_heart_side",
+        "south": "moloch:block/moloch_heart_side",
+        "north": "moloch:block/moloch_heart_side",
+        "down": "moloch:block/moloch_heart_bottom"
     }
 }

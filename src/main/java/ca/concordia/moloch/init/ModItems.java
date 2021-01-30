@@ -13,5 +13,5 @@ public class ModItems {
             Resources.MOD_ID);
 
     public static final RegistryObject<Item> MOLOCH_BLOCK = ITEMS.register("moloch",
-            () -> new BlockItem(ModBlocks.MOLOCH.get(), new Item.Properties().group(ItemGroup.BREWING)));
+            () -> new BlockItem(ModBlocks.MOLOCH.get(), new Item.Properties().group(ItemGroup.MISC)));
 }

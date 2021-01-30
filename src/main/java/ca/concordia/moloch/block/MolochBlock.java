@@ -18,7 +18,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class MolochBlock extends Block {
     public MolochBlock() {
-        super(Block.Properties.create(Material.IRON));
+        super(Block.Properties.create(Material.ROCK).hardnessAndResistance(100).setLightLevel(blockState -> 1));
     }
 
     @Override
@@ -41,7 +41,7 @@ public class MolochBlock extends Block {
 
         if (!(tile instanceof MolochTileEntity))
             return ActionResultType.FAIL;
-    
+
         NetworkHooks.openGui((ServerPlayerEntity) player, (MolochTileEntity) tile, blockPos);
 
         return ActionResultType.SUCCESS;
