@@ -1,11 +1,14 @@
 package ca.concordia.moloch;
 
+import ca.concordia.moloch.client.gui.MolochOPScreen;
 import ca.concordia.moloch.client.gui.MolochScreen;
 import ca.concordia.moloch.init.ModBlocks;
 import ca.concordia.moloch.init.ModContainers;
 import ca.concordia.moloch.init.ModItems;
 import ca.concordia.moloch.init.ModTileEntities;
 import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -28,5 +31,13 @@ public class MolochMod {
 
     public void setup(final FMLCommonSetupEvent event) {
         ScreenManager.registerFactory(ModContainers.MOLOCH.get(), MolochScreen::new);
+        ScreenManager.registerFactory(ModContainers.MOLOCH_OP.get(), MolochOPScreen::new);
     }
+
+    public static final ItemGroup ITEM_GROUP = new ItemGroup("moloch") {
+        @Override
+        public ItemStack createIcon() {
+            return new ItemStack(ModItems.MOLOCH_BLOCK.get());
+        }
+    };
 }

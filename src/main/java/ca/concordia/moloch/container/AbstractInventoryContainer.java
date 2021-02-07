@@ -70,7 +70,11 @@ public abstract class AbstractInventoryContainer<U extends TileEntity> extends C
         if(blockPos == null)
             throw new RuntimeException("No blockpos in data.");
 
-        return world.getTileEntity(blockPos);
+        TileEntity tileEntity = world.getTileEntity(blockPos);
+
+        System.out.println(tileEntity);
+
+        return tileEntity;
     }
     
     @Override

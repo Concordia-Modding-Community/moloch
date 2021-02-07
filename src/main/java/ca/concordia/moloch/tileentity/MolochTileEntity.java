@@ -1,6 +1,8 @@
 package ca.concordia.moloch.tileentity;
 
 import ca.concordia.moloch.container.MolochContainer;
+import ca.concordia.moloch.container.MolochOPContainer;
+import ca.concordia.moloch.init.ModItems;
 import ca.concordia.moloch.init.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerInventory;
@@ -24,20 +26,29 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
 public class MolochTileEntity extends LockableLootTileEntity implements ITickableTileEntity {
-    private static final int INVENTORY_SIZE = 4;
+    private static final int INVENTORY_SIZE = 1;
+    private static final int REQUESTS_SIZE = 9;
     public static final float MAX_HEALTH = 10000f;
 
     private NonNullList<ItemStack> contents = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
     private IItemHandlerModifiable items = createHandler();
     private LazyOptional<IItemHandlerModifiable> itemHandler = LazyOptional.of(() -> items);
-    private float health = MAX_HEALTH;
+
+    private MolochInventory molochInventory;
+    private float health;
+
+    public MolochTileEntity() {
+        this(ModTileEntities.MOLOCH.get());
+    }
 
     public MolochTileEntity(TileEntityType<?> tileEntityType) {
         super(tileEntityType);
+        this.molochInventory = new MolochInventory(this, REQUESTS_SIZE);
+        this.health = MAX_HEALTH;
     }
 
-    public MolochTileEntity() {
-        super(ModTileEntities.MOLOCH.get());
+    public MolochInventory getMolochInventory() {
+        return this.molochInventory;
     }
 
     private IItemHandlerModifiable createHandler() {
@@ -48,10 +59,10 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         ItemStack playerItem = contents.get(0);
         float maxProgress = 0;
 
-        for(int i = 1; i < INVENTORY_SIZE; i++) {
-            ItemStack targetItem = contents.get(i);
+        for (int i = 0; i < molochInventory.getSizeInventory(); i++) {
+            ItemStack targetItem = molochInventory.getStackInSlot(i);
 
-            if(playerItem.isItemEqual(targetItem)) {
+            if (playerItem.isItemEqual(targetItem)) {
                 maxProgress = Math.max(maxProgress, (float) playerItem.getCount() / (float) targetItem.getCount());
             }
         }
@@ -65,7 +76,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
 
     @Override
     public int getSizeInventory() {
-        return INVENTORY_SIZE;
+        return this.contents.size();
     }
 
     @Override
@@ -84,8 +95,12 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     @Override
-    protected Container createMenu(int id, PlayerInventory player) {
-        return new MolochContainer(id, player, this);
+    protected Container createMenu(int id, PlayerInventory playerInventory) {
+        if(playerInventory.getCurrentItem().isItemEqual(new ItemStack(ModItems.OPERATOR_KEY.get(), 1))) {
+            return new MolochOPContainer(id, playerInventory, this);
+        } else {
+            return new MolochContainer(id, playerInventory, this);
+        }
     }
 
     @Override
@@ -95,6 +110,8 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         if(!this.checkLootAndWrite(nbt)) {
             ItemStackHelper.saveAllItems(nbt, this.contents);
         }
+
+        nbt.put("requests", this.molochInventory.serializeNBT());
 
         nbt.putFloat("health", this.health);
 
@@ -106,8 +123,13 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         super.read(state, nbt);
 
         this.contents = NonNullList.withSize(this.getSizeInventory(), ItemStack.EMPTY);
+
         if (!this.checkLootAndRead(nbt)) {
             ItemStackHelper.loadAllItems(nbt, this.contents);
+        }
+
+        if(nbt.contains("requests")) {
+            this.molochInventory.deserializeNBT(nbt.getCompound("requests"));
         }
 
         if(nbt.contains("health")) {
@@ -130,6 +152,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     public <T> LazyOptional<T> getCapability(Capability<T> cap) {
         if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
             return this.itemHandler.cast();
+
         return super.getCapability(cap);
     }
 
@@ -149,8 +172,8 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         if (this.getItemProgress() >= 1) {
             ItemStack playerItem = contents.get(0);
 
-            for(int i = 1; i < INVENTORY_SIZE; i++) {
-                ItemStack targetItem = contents.get(i);
+            for(int i = 0; i < molochInventory.getSizeInventory(); i++) {
+                ItemStack targetItem = molochInventory.getStackInSlot(i);
     
                 if(playerItem.isItemEqual(targetItem) && playerItem.getCount() >= targetItem.getCount()) {
                     playerItem.setCount(playerItem.getCount() - targetItem.getCount());
@@ -168,10 +191,10 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         this.health = Math.max(0, this.health - 1f);
 
         // TODO: Fix particle emission + add engineery/organic sounds.
-        if (!world.isRemote) {
+        if (world.isRemote && this.world.rand.nextInt(100) < 10) {
             BlockPos blockPos = this.getPos();
 
-            world.addParticle(ParticleTypes.EXPLOSION, blockPos.getX(), blockPos.getY() + 3, blockPos.getZ(), 0, 0,
+            world.addParticle(ParticleTypes.LAVA, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0,
                     0);
         }
 

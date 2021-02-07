@@ -53,5 +53,9 @@ public class MolochBlock extends Block {
             return;
 
         TileEntity tileEntity = worldIn.getTileEntity(pos);
+
+        if (tileEntity instanceof MolochTileEntity) {
+            tileEntity.remove();
+        }
     }
 }

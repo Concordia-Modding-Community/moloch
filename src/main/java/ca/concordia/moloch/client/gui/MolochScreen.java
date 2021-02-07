@@ -35,10 +35,10 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
 
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
-        super.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
+        MolochTileEntity tileEntity = this.container.getTitleEntity();
 
-        drawString(matrixStack, this.font, this.title, 4210752, 8, 8);
-        drawString(matrixStack, this.font, this.playerInventory.getDisplayName(), 4210752, 8, this.ySize - 96 + 2);
+        this.font.func_243248_b(matrixStack, tileEntity.getDisplayName(), (float)this.titleX, (float)this.titleY, 4210752);
+        this.font.func_243248_b(matrixStack, this.playerInventory.getDisplayName(), (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY, 4210752);
     }
 
     @Override
