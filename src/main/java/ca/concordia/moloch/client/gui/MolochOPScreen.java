@@ -51,6 +51,19 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
     }
 
     @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        switch(keyCode) {
+            case 340:
+            case 341:
+            case 259:
+            case 256:
+                return super.keyPressed(keyCode, scanCode, modifiers);
+            default:
+                return false;
+        }
+    }
+
+    @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
