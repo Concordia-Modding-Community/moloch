@@ -81,7 +81,7 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
 
         StringTextComponent name = new StringTextComponent(this.searchField.getText());
 
-        if(!molochTileEntity.getCustomName().equals(name)) {
+        if(molochTileEntity.getCustomName() == null || !molochTileEntity.getCustomName().equals(name)) {
             molochTileEntity.setCustomName(name);
             molochTileEntity.markDirtyNetwork();
         }
