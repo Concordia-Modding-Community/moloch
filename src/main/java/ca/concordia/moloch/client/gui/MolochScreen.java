@@ -39,9 +39,14 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
         this.renderHoveredTooltip(matrixStack, mouseX, mouseY);
     }
 
+    private void drawText(String text, MatrixStack matrixStack, int x, int y, int color) {
+        this.font.func_243248_b(matrixStack, new StringTextComponent(text), (float) x,
+                (float) y, color);
+    }
+
     private void drawText(ITextComponent text, MatrixStack matrixStack, int x, int y) {
         this.font.func_243248_b(matrixStack, text, (float) x,
-                (float) y, 4210752);
+                (float) y, 0x404040);
     }
 
     private void drawText(String text, MatrixStack matrixStack, int x, int y) {
@@ -66,7 +71,10 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
 
         int yOffset = 22;
         for(Desire desire : state.getDesires()) {
-            drawText("" + desire.getCount(), matrixStack, 135, yOffset);
+            if(desire.getCount() > 0) {
+                drawText("" + desire.getCount(), matrixStack, 136, yOffset);
+                drawText("" + desire.getCount(), matrixStack, 135, yOffset - 1, 0xFFFFFF);
+            }
             
             yOffset += 18;
         }
@@ -85,7 +93,7 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
         MolochTileEntity tileEntity = this.container.getTitleEntity();
         Progression progression = tileEntity.getProgression();
 
-        float flameOffset = progression.getCompletionFraction();
+        float flameOffset = 1 - progression.getCompletionFraction();
 
         // Render flame.
         this.blit(matrixStack, x + 83, y + 57 + (int)(13 * (1 - flameOffset)), 176, (int) (13 * (1 - flameOffset)), 13, (int) (13 * flameOffset));

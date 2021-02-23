@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import ca.concordia.moloch.tileentity.IMarkDirty;
 import net.minecraft.entity.player.PlayerEntity;
@@ -17,6 +18,8 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
+    public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME; 
+
     private List<Reward> rewards;
     private List<Punishment> punishments;
     private List<Desire> desires;
@@ -42,8 +45,8 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
 
-        nbt.putString("startTime", startTime.format(DateTimeFormatter.ISO_DATE_TIME));
-        nbt.putString("endTime", endTime.format(DateTimeFormatter.ISO_DATE_TIME));
+        nbt.putString("startTime", getStartTimeString());
+        nbt.putString("endTime", getEndTimeString());
 
         ListNBT rewardNBTs = new ListNBT();
         for (Action reward : this.rewards) {
@@ -69,11 +72,11 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         if (nbt.contains("startTime")) {
-            this.startTime = LocalDateTime.parse(nbt.getString("startTime"), DateTimeFormatter.ISO_DATE_TIME);
+            this.setStartTime(nbt.getString("startTime"));
         }
 
         if (nbt.contains("endTime")) {
-            this.endTime = LocalDateTime.parse(nbt.getString("endTime"), DateTimeFormatter.ISO_DATE_TIME);
+            this.setEndTime(nbt.getString("endTime"));
         }
 
         if (nbt.contains("rewards")) {
@@ -138,6 +141,42 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
         return getTimeDifferenceInSeconds(LocalDateTime.now(), this.endTime);
     }
 
+    private static String getTimeString(LocalDateTime localDateTime) {
+        return localDateTime.format(TIME_FORMATTER);
+    }
+
+    public String getStartTimeString() {
+        return getTimeString(this.startTime);
+    }
+
+    public String getEndTimeString() {
+        return getTimeString(this.endTime);
+    }
+
+    private void setTime(String localString, Consumer<LocalDateTime> consumer) {
+        try {
+            LocalDateTime localDateTime = LocalDateTime.parse(localString, TIME_FORMATTER);
+
+            consumer.accept(localDateTime);
+        } catch(Exception e) {}
+    }
+
+    public void setStartTime(LocalDateTime localDateTime) {
+        this.startTime = localDateTime;
+    }
+
+    public void setStartTime(String localString) {
+        this.setTime(localString, this::setStartTime);
+    }
+
+    public void setEndTime(LocalDateTime localDateTime) {
+        this.endTime = localDateTime;
+    }
+
+    public void setEndTime(String localString) {
+        this.setTime(localString, this::setEndTime);
+    }
+
     public boolean consume(ItemStack itemStack) {
         for (Desire desire : this.desires) {
             if (desire.consume(itemStack)) {
@@ -159,7 +198,7 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
     }
 
     public boolean isPunishing() {
-        return this.getTimeLeftInSeconds() < 0;
+        return LocalDateTime.now().isAfter(this.endTime);
     }
 
     public State add(Punishment punishment) {

@@ -227,7 +227,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         if(this.progression.isPunishing()) {
-            if(world.rand.nextInt(1000) < 1) {
+            if(world.rand.nextInt(10000) < 1) {
                 this.progression.performPunishment(this.pos, world);
                 this.markDirtyServer();
             }

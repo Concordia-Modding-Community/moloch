@@ -18,6 +18,7 @@ import ca.concordia.moloch.tileentity.moloch.Progression;
 import ca.concordia.moloch.tileentity.moloch.Punishment;
 import ca.concordia.moloch.tileentity.moloch.Reward;
 import ca.concordia.moloch.tileentity.moloch.State;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
@@ -35,6 +36,8 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
             "textures/gui/container/moloch_op.png");
 
     private TextFieldWidget molochNameField;
+    private Optional<TextFieldWidget> startTimeField;
+    private Optional<TextFieldWidget> endTimeField;
     private List<ArrayList<TextFieldWidget>> desireFields;
     private Button desireAddButton;
     private Button desireRemoveButton;
@@ -51,8 +54,40 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
         this.guiTop = 0;
         this.xSize = 176;
         this.ySize = 166;
+        this.startTimeField = Optional.empty();
+        this.endTimeField = Optional.empty();
         this.desireFields = new ArrayList<ArrayList<TextFieldWidget>>();
         this.rewardFields = new ArrayList<TextFieldWidget>();
+        this.punishmentFields = new ArrayList<TextFieldWidget>();
+    }
+
+    private void clear() {
+        if(this.startTimeField.isPresent()) {
+            this.children.remove(this.startTimeField.get());
+            this.startTimeField = Optional.empty();
+        }
+
+        if(this.endTimeField.isPresent()) {
+            this.children.remove(this.endTimeField.get());
+            this.endTimeField = Optional.empty();
+        }
+
+        for(ArrayList<TextFieldWidget> listField : this.desireFields) {
+            for(TextFieldWidget textField : listField) {
+                this.children.remove(textField);
+            }
+        }
+
+        this.desireFields = new ArrayList<ArrayList<TextFieldWidget>>();
+
+        for(TextFieldWidget textField : this.rewardFields) {
+            this.children.remove(textField);
+        }
+        this.rewardFields = new ArrayList<TextFieldWidget>();
+
+        for(TextFieldWidget textField : this.punishmentFields) {
+            this.children.remove(textField);
+        }
         this.punishmentFields = new ArrayList<TextFieldWidget>();
     }
 
@@ -246,8 +281,8 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
         yOffset = updateLayoutPunishments(x, y, width, yOffset);
     }
 
-    private TextFieldWidget createTextField(String text, Consumer<String> consumer) {
-        TextFieldWidget textField = new TextFieldWidget(this.font, 0, 0, 0, 10, null);
+    private TextFieldWidget createTextField(String text, int x, int y, int width, int height, Consumer<String> consumer) {
+        TextFieldWidget textField = new TextFieldWidget(this.font, x, y, width, height, null);
 
         textField.setMaxStringLength(100);
         textField.setEnableBackgroundDrawing(true);
@@ -259,6 +294,10 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
         this.children.add(textField);
 
         return textField;
+    }
+
+    private TextFieldWidget createTextField(String text, Consumer<String> consumer) {
+        return this.createTextField(text, 0, 0, 100, 10, consumer);
     }
 
     private Button createButton(String text, int x, int y, IPressable iPressable) {
@@ -331,22 +370,29 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
         createButton("<", 0, 0, button -> { 
             progression.previous();
 
-            tileEntity.markDirtyClient();
-        });
-        createButton(">", 20, 0, button -> {
-            progression.next();
+            this.clear();
 
             tileEntity.markDirtyClient();
         });
+
+        createButton(">", 20, 0, button -> {
+            progression.next();
+
+            this.clear();
+
+            tileEntity.markDirtyClient();
+        });
+
         createButton("+", 40, 0, button -> {
             progression.add(new State());
 
             tileEntity.markDirtyClient();
         });
-        createButton(progression.getActive() ? "O" : "X", 60, 0, button -> {
+
+        createButton((progression.getActive() ? "X" : "O"), 60, 0, button -> {
             progression.setActive(!progression.getActive());
 
-            button.setMessage(new StringTextComponent(progression.getActive() ? "O" : "X"));
+            button.setMessage(new StringTextComponent((progression.getActive() ? "X" : "O")));
 
             tileEntity.markDirtyClient();
         });
@@ -359,6 +405,47 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
 
         this.punishmentAddButton = createAddFieldButton(state -> state.add(new Punishment()));
         this.punishmentRemoveButton = createRemoveFieldButton(state -> state.getPunishments());
+    }
+
+    private void initTimes() {
+        if(this.startTimeField.isPresent()) {
+            return;
+        }
+
+        MolochTileEntity tileEntity = this.container.getTitleEntity();
+        Progression progression = tileEntity.getProgression();
+
+        Optional<State> optionalState = progression.getCurrentState();
+
+        if(!optionalState.isPresent()) {
+            return;
+        }
+
+        State outerState = optionalState.get();
+
+        this.startTimeField = Optional.of(createTextField(outerState.getStartTimeString(), 15, 30, 100, 10, text -> {
+            Optional<State> oState = progression.getCurrentState();
+            
+            if(!oState.isPresent()) return;
+
+            State state = oState.get();
+
+            state.setStartTime(text);
+
+            tileEntity.markDirtyClient();
+        }));
+
+        this.endTimeField = Optional.of(createTextField(outerState.getEndTimeString(), 15, 50, 100, 10, text -> {
+            Optional<State> oState = progression.getCurrentState();
+            
+            if(!oState.isPresent()) return;
+
+            State state = oState.get();
+
+            state.setEndTime(text);
+
+            tileEntity.markDirtyClient();
+        }));
     }
 
     private void setButtonVisibility() {
@@ -414,6 +501,13 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
     }
 
     @Override
+    public void resize(Minecraft minecraft, int width, int height) {
+        super.resize(minecraft, width, height);
+
+        this.clear();
+    }
+
+    @Override
     public void tick() {
         this.molochNameField.tick();
 
@@ -430,6 +524,8 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
         for(TextFieldWidget textField : this.punishmentFields) {
             textField.tick();
         }
+
+        this.initTimes();
     }
 
     private void drawText(String text, MatrixStack matrixStack, int x, int y, int color) {
@@ -444,8 +540,8 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
         this.updateTextFieldCounts();
-        this.setButtonVisibility();
         this.updateLayouts();
+        this.setButtonVisibility();
 
         MolochTileEntity tileEntity = this.container.getTitleEntity();
         Progression progression = tileEntity.getProgression();
@@ -469,6 +565,12 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
          * Text Fields
          */
         this.molochNameField.render(matrixStack, mouseX, mouseY, partialTicks);
+
+        if(this.startTimeField.isPresent())
+            this.startTimeField.get().render(matrixStack, mouseX, mouseY, partialTicks);
+
+        if(this.endTimeField.isPresent())
+            this.endTimeField.get().render(matrixStack, mouseX, mouseY, partialTicks);
 
         for(ArrayList<TextFieldWidget> listField : this.desireFields) {
             for(TextFieldWidget textField : listField) {
