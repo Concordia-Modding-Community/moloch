@@ -5,6 +5,7 @@ import ca.concordia.moloch.client.gui.MolochScreen;
 import ca.concordia.moloch.init.ModBlocks;
 import ca.concordia.moloch.init.ModContainers;
 import ca.concordia.moloch.init.ModItems;
+import ca.concordia.moloch.init.ModPacketHandler;
 import ca.concordia.moloch.init.ModTileEntities;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.item.ItemGroup;
@@ -27,6 +28,7 @@ public class MolochMod {
         ModTileEntities.TILE_ENTITIES.register(forgeBus);
         ModItems.ITEMS.register(forgeBus);
         ModContainers.CONTAINERS.register(forgeBus);
+        ModPacketHandler.register();
     }
 
     public void setup(final FMLCommonSetupEvent event) {

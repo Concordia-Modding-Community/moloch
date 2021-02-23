@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import ca.concordia.moloch.Resources;
 import ca.concordia.moloch.container.MolochContainer;
 import ca.concordia.moloch.tileentity.MolochTileEntity;
+import ca.concordia.moloch.tileentity.moloch.Progression;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
@@ -52,13 +53,14 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
         this.blit(matrixStack, x, y, 0, 0, this.xSize, this.ySize);
 
         MolochTileEntity tileEntity = this.container.getTitleEntity();
+        Progression progression = tileEntity.getProgression();
 
-        float flameOffset = tileEntity.getHealth() / MolochTileEntity.MAX_HEALTH;
+        float flameOffset = progression.getCompletionFraction();
 
         // Render flame.
         this.blit(matrixStack, x + 83, y + 57 + (int)(13 * (1 - flameOffset)), 176, (int) (13 * (1 - flameOffset)), 13, (int) (13 * flameOffset));
 
-        int arrowProgress = (int) (23 * tileEntity.getItemProgress());
+        int arrowProgress = (int) (23 * progression.getCompletionFraction());
 
         // Render arrow.
         this.blit(matrixStack, x + 79, y + 34, 176, 14, arrowProgress, 16);

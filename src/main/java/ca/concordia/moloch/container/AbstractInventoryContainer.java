@@ -72,8 +72,6 @@ public abstract class AbstractInventoryContainer<U extends TileEntity> extends C
 
         TileEntity tileEntity = world.getTileEntity(blockPos);
 
-        System.out.println(tileEntity);
-
         return tileEntity;
     }
     

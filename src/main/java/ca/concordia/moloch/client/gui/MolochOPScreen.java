@@ -7,10 +7,15 @@ import ca.concordia.moloch.Resources;
 import ca.concordia.moloch.container.MolochOPContainer;
 import ca.concordia.moloch.tileentity.MolochInventory;
 import ca.concordia.moloch.tileentity.MolochTileEntity;
+import ca.concordia.moloch.tileentity.moloch.Desire;
+import ca.concordia.moloch.tileentity.moloch.Reward;
+import ca.concordia.moloch.tileentity.moloch.State;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -73,22 +78,32 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
         MolochTileEntity molochTileEntity = this.container.getTitleEntity();
-        MolochInventory molochInventory = molochTileEntity.getMolochInventory();
 
-        molochTileEntity.setCustomName(new StringTextComponent(this.searchField.getText()));
+        StringTextComponent name = new StringTextComponent(this.searchField.getText());
+
+        if(!molochTileEntity.getCustomName().equals(name)) {
+            molochTileEntity.setCustomName(name);
+            molochTileEntity.markDirtyNetwork();
+        }
 
         this.font.func_243248_b(matrixStack, this.playerInventory.getDisplayName(), (float) this.playerInventoryTitleX,
                 (float) this.playerInventoryTitleY, 4210752);
 
-        // addButton(new Button(this.guiLeft + 32, this.guiTop + 32, 20, 20, new StringTextComponent("<"),
-        //         button -> molochInventory.deltaOffset(-1)));
+        this.addButton(new Button(
+            10, 10, 20, 20, new StringTextComponent("+"), button -> {
+                molochTileEntity.getProgression().add(
+                    new State()
+                        .add(new Desire(new ItemStack(Item.getItemById(1)), 64))
+                        .add(new Reward("Carrots", "give @p minecraft:carrots"))
+                );
 
-        // addButton(new Button(this.guiLeft + 123, this.guiTop + 32, 20, 20, new StringTextComponent(">"),
-        //         button -> molochInventory.deltaOffset(1)));
+                molochTileEntity.markDirtyNetwork();
+            })
+        );
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTricks, int mouseX,
+    protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX,
             int mouseY) {
         // Render background.
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -97,6 +112,6 @@ public class MolochOPScreen extends ContainerScreen<MolochOPContainer> {
         int y = (this.height - this.ySize) / 2;
         this.blit(matrixStack, x, y, 0, 0, this.xSize, this.ySize);
 
-        this.searchField.render(matrixStack, mouseX, mouseY, partialTricks);
+        this.searchField.render(matrixStack, mouseX, mouseY, partialTicks);
     }
 }
