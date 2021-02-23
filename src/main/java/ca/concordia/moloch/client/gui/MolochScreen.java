@@ -1,16 +1,21 @@
 package ca.concordia.moloch.client.gui;
 
+import java.util.Optional;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import ca.concordia.moloch.Resources;
 import ca.concordia.moloch.container.MolochContainer;
 import ca.concordia.moloch.tileentity.MolochTileEntity;
+import ca.concordia.moloch.tileentity.moloch.Desire;
 import ca.concordia.moloch.tileentity.moloch.Progression;
+import ca.concordia.moloch.tileentity.moloch.State;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -34,12 +39,37 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
         this.renderHoveredTooltip(matrixStack, mouseX, mouseY);
     }
 
+    private void drawText(ITextComponent text, MatrixStack matrixStack, int x, int y) {
+        this.font.func_243248_b(matrixStack, text, (float) x,
+                (float) y, 4210752);
+    }
+
+    private void drawText(String text, MatrixStack matrixStack, int x, int y) {
+        this.drawText(new StringTextComponent(text), matrixStack, x, y);
+    }
+
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
         MolochTileEntity tileEntity = this.container.getTitleEntity();
 
-        this.font.func_243248_b(matrixStack, tileEntity.getDisplayName(), (float)this.titleX, (float)this.titleY, 4210752);
-        this.font.func_243248_b(matrixStack, this.playerInventory.getDisplayName(), (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY, 4210752);
+        drawText(tileEntity.getDisplayName(), matrixStack, titleX, titleY);
+        drawText(playerInventory.getDisplayName(), matrixStack, playerInventoryTitleX, playerInventoryTitleY);
+
+        Progression progression = tileEntity.getProgression();
+        Optional<State> oState = progression.getCurrentState();
+
+        if(!oState.isPresent()) {
+            return;
+        }
+
+        State state = oState.get();
+
+        int yOffset = 22;
+        for(Desire desire : state.getDesires()) {
+            drawText("" + desire.getCount(), matrixStack, 135, yOffset);
+            
+            yOffset += 18;
+        }
     }
 
     @Override
@@ -59,10 +89,5 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
 
         // Render flame.
         this.blit(matrixStack, x + 83, y + 57 + (int)(13 * (1 - flameOffset)), 176, (int) (13 * (1 - flameOffset)), 13, (int) (13 * flameOffset));
-
-        int arrowProgress = (int) (23 * progression.getCompletionFraction());
-
-        // Render arrow.
-        this.blit(matrixStack, x + 79, y + 34, 176, 14, arrowProgress, 16);
     }
 }

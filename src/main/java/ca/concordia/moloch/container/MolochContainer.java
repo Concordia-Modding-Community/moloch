@@ -1,8 +1,12 @@
 package ca.concordia.moloch.container;
 
+import java.util.Optional;
+
 import ca.concordia.moloch.init.ModBlocks;
 import ca.concordia.moloch.init.ModContainers;
 import ca.concordia.moloch.tileentity.MolochTileEntity;
+import ca.concordia.moloch.tileentity.moloch.Progression;
+import ca.concordia.moloch.tileentity.moloch.State.StateInventory;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
@@ -26,6 +30,20 @@ public class MolochContainer extends AbstractInventoryContainer<MolochTileEntity
     @Override
     protected void addMainInventory(MolochTileEntity tileEntity) {
         this.addSlot(new Slot(tileEntity, 0, 50, 34));
+
+        Progression progression = tileEntity.getProgression();
+
+        Optional<StateInventory> stateInventory = progression.getInventory();
+
+        if(!stateInventory.isPresent()) {
+            return;
+        }
+
+        IInventory inventory = stateInventory.get();
+
+        for(int i = 0; i < inventory.getSizeInventory(); i++) {
+            this.addSlot(new Slot(inventory, i, 113, 17 + i * 18));
+        }
     }
 
     @Override

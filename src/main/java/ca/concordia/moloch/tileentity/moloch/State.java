@@ -13,6 +13,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
@@ -76,7 +77,7 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
         }
 
         if (nbt.contains("rewards")) {
-            ListNBT rewardNBTs = nbt.getList("rewards", 0);
+            ListNBT rewardNBTs = nbt.getList("rewards", Constants.NBT.TAG_COMPOUND);
 
             rewardNBTs.stream().forEach(rewardNBT -> {
                 Reward reward = new Reward();
@@ -88,7 +89,7 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
         }
 
         if (nbt.contains("punishments")) {
-            ListNBT punishmentNBTs = nbt.getList("punishments", 0);
+            ListNBT punishmentNBTs = nbt.getList("punishments", Constants.NBT.TAG_COMPOUND);
 
             punishmentNBTs.stream().forEach(punishmentNBT -> {
                 Punishment punishment = new Punishment();
@@ -100,7 +101,7 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
         }
 
         if(nbt.contains("desires")) {
-            ListNBT desireNBTs = nbt.getList("desires", 0);
+            ListNBT desireNBTs = nbt.getList("desires", Constants.NBT.TAG_COMPOUND);
 
             desireNBTs.stream().forEach(desireNBT -> {
                 Desire desire = new Desire();
@@ -179,6 +180,10 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
         return this;
     }
 
+    public List<Desire> getDesires() {
+        return desires;
+    }
+
     public List<Reward> getRewards() {
         return this.rewards;
     }
@@ -188,18 +193,10 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
     }
 
     public Optional<Punishment> getRandomPunishement() {
-        if (!this.isPunishing()) {
-            return Optional.empty();
-        }
-
         return Action.getRandomFromList(this.punishments);
     }
 
     public Optional<Reward> getRandomReward() {
-        if (!this.isComplete()) {
-            return Optional.empty();
-        }
-
         return Action.getRandomFromList(this.rewards);
     }
 
@@ -225,10 +222,6 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
 
         @Override
         public void clear() {
-            for(Desire desire : this.state.desires) {
-                desire.setItem(ItemStack.EMPTY);
-                desire.setCount(0);
-            }
         }
 
         @Override
@@ -243,62 +236,21 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
 
         @Override
         public ItemStack getStackInSlot(int index) {
-            Desire desire = this.state.desires.get(index);
-            ItemStack itemStack = desire.getItem().copy();
-
-            int consumeCount = Math.min(itemStack.getMaxStackSize(), desire.getCount());
-
-            itemStack.setCount(consumeCount);
-            desire.setCount(desire.getCount() - consumeCount);
-
-            if(desire.getCount() == 0) {
-                desire.setItem(ItemStack.EMPTY);
-            }
-
-            return itemStack;
+            return this.state.desires.get(index).getItemStack();
         }
 
         @Override
         public ItemStack decrStackSize(int index, int count) {
-            Desire desire = this.state.desires.get(index);
-            ItemStack itemStack = desire.getItem().copy();
-
-            int consumeCount = Math.min(count, Math.min(desire.getCount(), itemStack.getMaxStackSize()));
-
-            itemStack.setCount(consumeCount);
-            desire.setCount(desire.getCount() - consumeCount);
-
-            if(desire.getCount() == 0) {
-                desire.setItem(ItemStack.EMPTY);
-            }
-
-            return itemStack;
+            return ItemStack.EMPTY;
         }
 
         @Override
         public ItemStack removeStackFromSlot(int index) {
-            Desire desire = this.state.desires.get(index);
-            ItemStack itemStack = desire.getItem().copy();
-
-            if(desire.getCount() > itemStack.getMaxStackSize()) {
-                itemStack.setCount(itemStack.getMaxStackSize());
-                desire.setCount(desire.getCount() - itemStack.getMaxStackSize());
-            } else {
-                itemStack.setCount(desire.getCount());
-                desire.setItem(ItemStack.EMPTY);
-            }
-
-            return itemStack;
+            return ItemStack.EMPTY;
         }
 
         @Override
         public void setInventorySlotContents(int index, ItemStack stack) {
-            Desire desire = this.state.desires.get(index);
-            ItemStack newStack = stack.copy();
-
-            newStack.setCount(1);
-            desire.setCount(stack.getCount());
-            desire.setItem(newStack);
         }
 
         @Override

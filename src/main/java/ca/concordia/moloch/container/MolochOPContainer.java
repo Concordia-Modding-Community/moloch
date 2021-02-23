@@ -34,4 +34,12 @@ public class MolochOPContainer extends AbstractInventoryContainer<MolochTileEnti
     public boolean canInteractWith(PlayerEntity playerIn) {
         return isWithinUsableDistance(this.canInteractWithCallable, playerIn, ModBlocks.MOLOCH.get());
     }
+
+    @Override
+    protected void addPlayerInventory(PlayerInventory playerInventory, int x, int y) {
+    }
+
+    @Override
+    protected void addInventoryHotbar(PlayerInventory playerInventory, int x, int y) {
+    }
 }

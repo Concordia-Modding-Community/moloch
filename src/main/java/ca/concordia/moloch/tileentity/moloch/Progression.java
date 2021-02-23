@@ -10,19 +10,27 @@ import ca.concordia.moloch.tileentity.moloch.State.StateInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public class Progression implements INBTSerializable<CompoundNBT>, IMarkDirty {
     private List<State> states;
     private int index;
-    private IMarkDirty parent;
+    private boolean isActive;
+    private Optional<IMarkDirty> parent;
 
-    public Progression(IMarkDirty parent) {
-        this.parent = parent;
+    public Progression() {
+        this.parent = Optional.empty();
         this.states = new ArrayList<State>();
         this.index = 0;
+        this.isActive = false;
+    }
+
+    public void setParent(IMarkDirty parent) {
+        this.parent = Optional.ofNullable(parent);
     }
 
     @Override
@@ -36,6 +44,7 @@ public class Progression implements INBTSerializable<CompoundNBT>, IMarkDirty {
 
         nbt.put("list", stateNBTs);
         nbt.putInt("index", this.index);
+        nbt.putBoolean("active", this.isActive);
 
         return nbt;
     }
@@ -43,7 +52,7 @@ public class Progression implements INBTSerializable<CompoundNBT>, IMarkDirty {
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         if(nbt.contains("list")) {
-            ListNBT stateNBTs = nbt.getList("list", 0);
+            ListNBT stateNBTs = nbt.getList("list", Constants.NBT.TAG_COMPOUND);
 
             stateNBTs.stream().forEach(progressionNBT -> {
                 State state = new State();
@@ -56,6 +65,10 @@ public class Progression implements INBTSerializable<CompoundNBT>, IMarkDirty {
 
         if(nbt.contains("index")) {
             this.index = nbt.getInt("index");
+        }
+
+        if(nbt.contains("active")) {
+            this.isActive = nbt.getBoolean("active");
         }
     }
 
@@ -79,7 +92,9 @@ public class Progression implements INBTSerializable<CompoundNBT>, IMarkDirty {
         return state.get().isComplete();
     }
 
-    private <T extends Action> void perform(Vector3d position, ServerWorld world, Function<State, Optional<T>> callback) {
+    private <T extends Action> void perform(BlockPos blockPos, ServerWorld world, Function<State, Optional<T>> callback) {
+        Vector3d position = new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+
         Optional<State> state = this.getCurrentState();
 
         if(!state.isPresent()) {
@@ -95,12 +110,12 @@ public class Progression implements INBTSerializable<CompoundNBT>, IMarkDirty {
         action.get().perform(position, world);
     }
 
-    public void performReward(Vector3d position, ServerWorld world) {
-        this.perform(position, world, state -> state.getRandomReward());
+    public void performReward(BlockPos blockPos, ServerWorld world) {
+        this.perform(blockPos, world, state -> state.getRandomReward());
     }
 
-    public void performPunishment(Vector3d position, ServerWorld world) {
-        this.perform(position, world, state -> state.getRandomPunishement());
+    public void performPunishment(BlockPos blockPos, ServerWorld world) {
+        this.perform(blockPos, world, state -> state.getRandomPunishement());
     }
 
     public boolean isPunishing() {
@@ -138,22 +153,38 @@ public class Progression implements INBTSerializable<CompoundNBT>, IMarkDirty {
      * Sets the next progression state.
      */
     public void next() {
-        this.index++;
+        this.index = Math.min(this.index + 1, this.getNumberOfStates());
     }
 
     /**
      * Sets the previous progression state.
      */
     public void previous() {
-        this.index = Math.max(this.index, 0);
+        this.index = Math.max(this.index - 1, 0);
     }
 
-    private Optional<State> getCurrentState() {
+    public int getIndex() {
+        return this.index;
+    }
+
+    public int getNumberOfStates() {
+        return this.states.size();
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public boolean getActive() {
+        return this.isActive;
+    }
+
+    public Optional<State> getCurrentState() {
         if(this.index < 0 || this.index >= this.states.size()) {
             return Optional.empty();
         }
 
-        return Optional.of(this.states.get(this.index));
+        return Optional.ofNullable(this.states.get(this.index));
     }
 
     public Optional<StateInventory> getInventory() {
@@ -168,6 +199,10 @@ public class Progression implements INBTSerializable<CompoundNBT>, IMarkDirty {
 
     @Override
     public void markDirty() {
-        this.parent.markDirty();
+        if(!this.parent.isPresent()) {
+            return;
+        }
+
+        this.parent.get().markDirty();
     }
 }

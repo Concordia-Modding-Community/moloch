@@ -23,7 +23,6 @@ import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -36,12 +35,14 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 
 public class MolochTileEntity extends LockableLootTileEntity implements ITickableTileEntity, IMarkDirty {
     private static final int INVENTORY_SIZE = 1;
+    private static final int CONSUME_TIME = 10;
 
     private NonNullList<ItemStack> contents = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
     private IItemHandlerModifiable items = createHandler();
     private LazyOptional<IItemHandlerModifiable> itemHandler = LazyOptional.of(() -> items);
 
     private Progression progression;
+    private int consumeTick;
 
     public MolochTileEntity() {
         this(ModTileEntities.MOLOCH.get());
@@ -49,7 +50,14 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
 
     public MolochTileEntity(TileEntityType<?> tileEntityType) {
         super(tileEntityType);
-        this.progression = new Progression(this);
+        this.setCustomName(this.getDefaultName());
+        this.setProgression(new Progression());
+        this.consumeTick = 0;
+    }
+
+    public void setProgression(Progression progression) {
+        this.progression = progression;
+        progression.setParent(this);
     }
 
     private IItemHandlerModifiable createHandler() {
@@ -166,10 +174,16 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         }
     }
 
-    public void markDirtyNetwork() {
+    public void markDirtyClient() {
+        ModPacketHandler.sendToServer(new UpdateMoloch(this.pos, this.getCustomName(), this.getProgression()));
+
         this.markDirty();
-        
-        ModPacketHandler.HANDLER.sendToServer(new UpdateMoloch(this.pos, this.getCustomName()));
+    }
+
+    public void markDirtyServer() {
+        ModPacketHandler.sendToPlayers((ServerWorld) this.getWorld(), new UpdateMoloch(this.pos, this.getCustomName(), this.getProgression()));
+
+        this.markDirty();
     }
 
     public Progression getProgression() {
@@ -177,6 +191,10 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     private void tickClient() {
+        if(!progression.getActive()) {
+            return;
+        }
+
         World world = this.getWorld();
 
         if (this.world.rand.nextInt(100) < 10) {
@@ -188,19 +206,30 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     private void tickServer() {
-        ServerWorld world = (ServerWorld) this.getWorld();
-        Vector3d position = new Vector3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+        if(!progression.getActive()) {
+            return;
+        }
 
-        this.progression.consume(contents.get(0));
+        ServerWorld world = (ServerWorld) this.getWorld();
+
+        if(this.consumeTick++ >= CONSUME_TIME) {
+            this.consumeTick = 0;
+
+            if(this.progression.consume(contents.get(0))) {
+                this.markDirtyServer();
+            }
+        }
 
         if(this.progression.isComplete()) {
-            this.progression.performReward(position, world);
+            this.progression.performReward(this.pos, world);
             this.progression.next();
+            this.markDirtyServer();
         }
 
         if(this.progression.isPunishing()) {
             if(world.rand.nextInt(1000) < 1) {
-                this.progression.performPunishment(position, world);
+                this.progression.performPunishment(this.pos, world);
+                this.markDirtyServer();
             }
         }
     }

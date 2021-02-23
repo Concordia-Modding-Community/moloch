@@ -25,6 +25,14 @@ public abstract class Action implements INBTSerializable<CompoundNBT> {
         );
     }
 
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
     public Action(String actionName, String command) {
         this.actionName = actionName;
         this.command = command;
