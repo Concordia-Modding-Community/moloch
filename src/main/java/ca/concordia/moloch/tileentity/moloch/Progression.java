@@ -197,12 +197,16 @@ public class Progression implements INBTSerializable<CompoundNBT>, IMarkDirty {
         return Optional.of(state.get().getInventory());
     }
 
+    /**
+     * Using try catch here because for some reason on the build
+     * this can randomly throw an AbstractMethodException.
+     */
     @Override
     public void markDirty() {
-        if(!this.parent.isPresent()) {
-            return;
+        try {
+            this.parent.get().markDirty();
+        } catch(Error e) {
+        } catch(Exception e) {
         }
-
-        this.parent.get().markDirty();
     }
 }

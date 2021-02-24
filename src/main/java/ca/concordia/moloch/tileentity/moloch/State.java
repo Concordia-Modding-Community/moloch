@@ -38,7 +38,7 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
     }
 
     public void setParent(Progression progression) {
-        this.progression = Optional.of(progression);
+        this.progression = Optional.ofNullable(progression);
     }
 
     @Override
@@ -294,6 +294,10 @@ public class State implements INBTSerializable<CompoundNBT>, IMarkDirty {
 
         @Override
         public void markDirty() {
+            if(this.state == null) {
+                return;
+            }
+
             this.state.markDirty();
         }
 

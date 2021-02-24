@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import ca.concordia.moloch.init.ModBlocks;
 import ca.concordia.moloch.init.ModContainers;
-import ca.concordia.moloch.tileentity.MolochInventory;
 import ca.concordia.moloch.tileentity.MolochTileEntity;
 import ca.concordia.moloch.tileentity.moloch.State.StateInventory;
 import net.minecraft.entity.player.PlayerEntity;

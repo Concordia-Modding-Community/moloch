@@ -174,6 +174,10 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         }
     }
 
+    public void markDirty() {
+        super.markDirty();
+    }
+
     public void markDirtyClient() {
         ModPacketHandler.sendToServer(new UpdateMoloch(this.pos, this.getCustomName(), this.getProgression()));
 

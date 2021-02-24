@@ -11,6 +11,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class UpdateMoloch {
@@ -32,7 +34,7 @@ public class UpdateMoloch {
 
     public static UpdateMoloch decode(PacketBuffer buffer) {
         BlockPos blockPos = buffer.readBlockPos();
-        ITextComponent name = ITextComponent.Serializer.getComponentFromJson(buffer.readString());
+        ITextComponent name = ITextComponent.Serializer.getComponentFromJson(buffer.readString(32767));
         CompoundNBT progressionNBT = buffer.readCompoundTag();
         Progression progression = new Progression();
 
@@ -59,18 +61,22 @@ public class UpdateMoloch {
         molochTileEntity.setProgression(msg.progression);
     }
 
-    public static void handle(final UpdateMoloch msg, final Supplier<NetworkEvent.Context> ctx) {
-        if(ctx.get().getDirection().getReceptionSide().isClient()) {
-            Minecraft instance = Minecraft.getInstance();
+    @OnlyIn(Dist.CLIENT)
+    public static void handleClient(final UpdateMoloch msg, final Supplier<NetworkEvent.Context> ctx) {
+        Minecraft instance = Minecraft.getInstance();
 
-            updateMolochTileEntity(msg, instance.world);
-        } else {
-            ctx.get().enqueueWork(() -> {
-                World world = ctx.get().getSender().world;
+        updateMolochTileEntity(msg, instance.world);
 
-                updateMolochTileEntity(msg, world);
-            });
-        }
+        ctx.get().setPacketHandled(true);
+    }
+
+    @OnlyIn(Dist.DEDICATED_SERVER)
+    public static void handleServer(final UpdateMoloch msg, final Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            World world = ctx.get().getSender().world;
+
+            updateMolochTileEntity(msg, world);
+        });
 
         ctx.get().setPacketHandled(true);
     }
