@@ -61,8 +61,16 @@ public class UpdateMoloch {
         molochTileEntity.setProgression(msg.progression);
     }
 
+    public static void handle(final UpdateMoloch msg, final Supplier<NetworkEvent.Context> ctx) {
+        if(ctx.get().getDirection().getReceptionSide().isClient()) {
+            handleClient(msg, ctx);
+        } else {
+            handleServer(msg, ctx);
+        }
+    }
+
     @OnlyIn(Dist.CLIENT)
-    public static void handleClient(final UpdateMoloch msg, final Supplier<NetworkEvent.Context> ctx) {
+    private static void handleClient(final UpdateMoloch msg, final Supplier<NetworkEvent.Context> ctx) {
         Minecraft instance = Minecraft.getInstance();
 
         updateMolochTileEntity(msg, instance.world);
@@ -70,8 +78,7 @@ public class UpdateMoloch {
         ctx.get().setPacketHandled(true);
     }
 
-    @OnlyIn(Dist.DEDICATED_SERVER)
-    public static void handleServer(final UpdateMoloch msg, final Supplier<NetworkEvent.Context> ctx) {
+    private static void handleServer(final UpdateMoloch msg, final Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             World world = ctx.get().getSender().world;
 

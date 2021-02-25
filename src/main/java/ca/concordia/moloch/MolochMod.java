@@ -22,6 +22,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class MolochMod {
     public MolochMod() {
         IEventBus forgeBus = FMLJavaModLoadingContext.get().getModEventBus();
+        forgeBus.addListener(EventPriority.NORMAL, this::setup);
         forgeBus.addListener(EventPriority.NORMAL, this::clientSetup);
         forgeBus.addListener(EventPriority.NORMAL, this::serverSetup);
 
@@ -33,14 +34,16 @@ public class MolochMod {
         ModContainers.CONTAINERS.register(forgeBus);
     }
 
+    public void setup(final FMLCommonSetupEvent event) {
+        ModPacketHandler.register();
+    }
+
     public void clientSetup(final FMLClientSetupEvent event) {
-        ModPacketHandler.registerClient();
         ScreenManager.registerFactory(ModContainers.MOLOCH.get(), MolochScreen::new);
         ScreenManager.registerFactory(ModContainers.MOLOCH_OP.get(), MolochOPScreen::new);
     }
 
     public void serverSetup(final FMLDedicatedServerSetupEvent event) {
-        ModPacketHandler.registerServer();
     }
 
     public static final ItemGroup ITEM_GROUP = new ItemGroup("moloch") {

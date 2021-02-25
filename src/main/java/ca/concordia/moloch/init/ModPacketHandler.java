@@ -26,18 +26,10 @@ public class ModPacketHandler {
 			PROTOCOL_VERSION::equals
     );
 
-    @OnlyIn(Dist.CLIENT)
-    public static void registerClient() {
+    public static void register() {
         int id = 0;
 
-        HANDLER.registerMessage(id++, UpdateMoloch.class, UpdateMoloch::encode, UpdateMoloch::decode, UpdateMoloch::handleClient, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-    }
-
-    @OnlyIn(Dist.DEDICATED_SERVER)
-    public static void registerServer() {
-        int id = 0;
-
-        HANDLER.registerMessage(id++, UpdateMoloch.class, UpdateMoloch::encode, UpdateMoloch::decode, UpdateMoloch::handleServer, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        HANDLER.registerMessage(id++, UpdateMoloch.class, UpdateMoloch::encode, UpdateMoloch::decode, UpdateMoloch::handle);
     }
 
     public static void sendToServer(Object msg) {
