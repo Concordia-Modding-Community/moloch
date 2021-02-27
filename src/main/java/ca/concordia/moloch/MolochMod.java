@@ -1,11 +1,9 @@
 package ca.concordia.moloch;
 
-import ca.concordia.moloch.client.gui.MolochOPScreen;
 import ca.concordia.moloch.client.gui.MolochScreen;
 import ca.concordia.moloch.init.ModBlocks;
 import ca.concordia.moloch.init.ModContainers;
 import ca.concordia.moloch.init.ModItems;
-import ca.concordia.moloch.init.ModPacketHandler;
 import ca.concordia.moloch.init.ModTileEntities;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.item.ItemGroup;
@@ -35,12 +33,11 @@ public class MolochMod {
     }
 
     public void setup(final FMLCommonSetupEvent event) {
-        ModPacketHandler.register();
+        
     }
 
     public void clientSetup(final FMLClientSetupEvent event) {
         ScreenManager.registerFactory(ModContainers.MOLOCH.get(), MolochScreen::new);
-        ScreenManager.registerFactory(ModContainers.MOLOCH_OP.get(), MolochOPScreen::new);
     }
 
     public void serverSetup(final FMLDedicatedServerSetupEvent event) {
