@@ -39,7 +39,7 @@ In each progression, there is a list of desired items with a desired amount asso
 
 ### Desires
  * To add desires to the new
-/data modify block <blockPos> progressions[0].desires prepend value {id: 1, item: "<item>", amountTotal: 4, amountRemaining: 2}
+`/data modify block <blockPos> progressions[0].desires prepend value {id: 1, item: "<item>", amountTotal: 4, amountRemaining: 2}`
 ```json
 {
   id: 1L, 
