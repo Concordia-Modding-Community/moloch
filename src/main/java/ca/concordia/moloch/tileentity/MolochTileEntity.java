@@ -1,24 +1,34 @@
 package ca.concordia.moloch.tileentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+
+import com.mojang.authlib.GameProfile;
 
 import ca.concordia.moloch.container.MolochContainer;
 import ca.concordia.moloch.init.ModTileEntities;
 import ca.concordia.moloch.tileentity.moloch.action.Action;
 import ca.concordia.moloch.tileentity.moloch.desire.Desire;
-import ca.concordia.moloch.tileentity.moloch.progression.ProgressionMapper;
 import ca.concordia.moloch.tileentity.moloch.progression.Progression;
+import ca.concordia.moloch.tileentity.moloch.progression.ProgressionMapper;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.particles.ParticleTypes;
@@ -32,7 +42,9 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -51,7 +63,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     private Progression currentProgression = null;
 
     //We haven't done this yet...
-    private List<PlayerUUID> team = new ArrayList<PlayerUUID>();
+    private List<UUID> subjects = new ArrayList<UUID>();
     private String molochName = this.getDefaultName().getString();
     long lastConsumption = System.currentTimeMillis();
     
@@ -105,6 +117,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
 
     private static class NBT {
 		public static final String MOLOCH_NAME = "molochName";
+		public static final String SUBJECTS = "subjects";
 	}
 
     @Override
@@ -117,6 +130,12 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         }
 
         nbt.putString(NBT.MOLOCH_NAME, this.molochName);
+        
+        ListNBT subs = new ListNBT();
+        for(UUID uuid: this.subjects) {
+			subs.add(StringNBT.valueOf(uuid.toString()));
+        }
+        nbt.put(NBT.SUBJECTS, subs);
         
         new ProgressionMapper().insert(nbt, progressions);
 
@@ -140,6 +159,30 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         if(nbt.contains(NBT.MOLOCH_NAME)) {
         	this.molochName = nbt.getString(NBT.MOLOCH_NAME);
         }
+        
+        if(nbt.contains(NBT.SUBJECTS)) {
+        	ListNBT subs = nbt.getList(NBT.SUBJECTS, Constants.NBT.TAG_STRING);
+        	List<UUID> newSubs = new ArrayList<UUID>();
+        	
+        	Map<UUID, String> mapRegular = UsernameCache.getMap();
+        	//A quick solution to reverse the map.
+        	//Feb. 28, 2021
+        	//https://stackoverflow.com/a/20412432
+        	Map<Object, Object> mapInversed = 
+        			mapRegular.entrySet()
+    			       .stream()
+    			       .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        	for(INBT sub :subs) {
+        		try {
+        			if(mapRegular.containsKey(UUID.fromString(sub.getString()))) newSubs.add(UUID.fromString(sub.getString()));
+        		} catch (IllegalArgumentException e) {
+        			if(mapInversed.containsKey(sub.getString())) newSubs.add((UUID)mapInversed.get(sub.getString()));
+        		}
+
+        	}
+        	subjects = newSubs;
+        	System.out.println(Arrays.toString(subjects.toArray()));
+        }
 
         this.progressions = new ProgressionMapper().find(nbt);
         
@@ -149,8 +192,6 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     private Queue<Action> buildActionQueue() {
-        System.out.println("Building Action Queue");
-        
         Queue<Action> newQueue = new LinkedList<Action>();
         
 		for(Progression progression : this.progressions) {

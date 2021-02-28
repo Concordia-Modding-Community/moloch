@@ -11,7 +11,25 @@ In each progression, there is a list of desired items with a desired amount asso
  * You can inspect your moloch with `/data get block <targetPos>`
 Keep in mind that since this is the vanilla data command, `<targetPos>` can either be x, y, z coodinates or any of the usual target selectors. Just make sure you've got a moloch block to edit before you start messing around or it will be very boring for you.
 
+```json
+{
+	molochName: "Moloch", 
+	subjects: [], 
+	progressions: [], 
+	x: 29, y: 64, z: -12, 
+	Items: [], 
+	id: "moloch:moloch"
+}
+
+```
+
+The basic structure has the `molochName` (defaults to "Moloch") that users will see when they interact with the moloch block. `subjects` lets moloch know which players it should pay speciial attention to. `progressions` are the meat of the moloch mod and are explained in detail below. Since the moloch block is a container, it contains a list of `Items`.
+
  * You can update the name of your moloch with `/data modify block <targetPos> molochName set value "<newName>"`
+ * You can append subjects with `/data modify block <targetPos> subjects append value <NAME|UUID>` where you can user either a username or a uuid. If recognized, you'll see that UUIDs are used to populate the NBT data, and the `<NAME>` is just allowed as a convenient shorthand. It populates out of UsernameCache, so if users aren't there, Moloch will not deign for them to be subject to their whims. You can remove subjects by `<index>` `/data remove block <targetPos> subjects[<index>]`
+ * You can change the contents of the moloch block's inventory slot with `/data modify block <targetPos> Items append value {id: "<item>", Slot: 0, Count: <amount>}`. You can empty the slot using `/data remove block <targetPos> Items[0]`
+ where `<item>` is any item id and `<amount>` is a stack size, though all this is subject to the regular container restrictions (it'll ignore trying to append with other slots). 
+ 
 
 ### Progressions
  * Building a full progression is a bit long for one command, so you may want to break it up and start with a blank progression: 
