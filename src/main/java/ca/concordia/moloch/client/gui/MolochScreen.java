@@ -148,7 +148,17 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
         int y = (this.height - this.ySize) / 2;
         this.blit(matrixStack, x, y, 0, 0, this.xSize, this.ySize);
 
-        MolochTileEntity tileEntity = this.container.getTitleEntity();
+        drawFlameProgress(matrixStack, x, y);
+        
+        //TODO: When actions have labels and icons affixed, we can
+        //consider showing them with a tooltip that shows the label-message 
+        //and possibly information about how often and for potentially how long it'll persist. 
+        //drawActionBadges(matrixStack, mouseX, mouseY);
+
+    }
+
+	public void drawActionBadges(MatrixStack matrixStack, int mouseX, int mouseY) {
+		MolochTileEntity tileEntity = this.container.getTitleEntity();
 
         this.minecraft.getTextureManager().bindTexture(new ResourceLocation("minecraft", "textures/gui/widgets.png"));
 
@@ -184,7 +194,5 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
 
             yOffset += 24;
         }
-        
-        drawFlameProgress(matrixStack, x, y);
-    }
+	}
 }
