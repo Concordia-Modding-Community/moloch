@@ -54,23 +54,23 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
         MolochTileEntity tileEntity = this.container.getTitleEntity();
-        
 
         drawText(tileEntity.getMolochName(), matrixStack, titleX, titleY);
         drawText(playerInventory.getDisplayName(), matrixStack, playerInventoryTitleX, playerInventoryTitleY);
-
 
         if(tileEntity.getCurrentProgression() == null) return;
 
         int yOffset = 22;
         for(Desire desire : tileEntity.getCurrentProgression().getDesires()) {
-        	itemRenderer.renderItemIntoGUI(new ItemStack(() -> desire.getItem(), 1), 113, yOffset-5);
+            itemRenderer.renderItemIntoGUI(new ItemStack(() -> desire.getItem(), 1), 113, yOffset-5);
+            
         	if(desire.getItem().equals(Items.BEDROCK)) {
                 drawText("err", matrixStack, 135, yOffset - 1, 0xFF4444);
         	} else if(desire.getAmountRemaining() > 0) {
                 drawText("" + desire.getAmountRemaining(), matrixStack, 136, yOffset);
                 drawText("" + desire.getAmountRemaining(), matrixStack, 135, yOffset - 1, 0xFFFFFF);
             }
+            
             yOffset += 18;
         }
     }

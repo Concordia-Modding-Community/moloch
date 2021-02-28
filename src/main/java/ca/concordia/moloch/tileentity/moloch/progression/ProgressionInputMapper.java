@@ -14,13 +14,14 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.util.Constants;
 
 public class ProgressionInputMapper {
-
 	public static List<Progression> find(CompoundNBT nbt) {
 		List<Progression> progressions = new LinkedList<Progression>();
 		ListNBT list = nbt.getList("progressions", Constants.NBT.TAG_COMPOUND);
-		for(INBT a: list) {
-			progressions.add(get((CompoundNBT) a));
+
+		for(INBT eNBT : list) {
+			progressions.add(get((CompoundNBT) eNBT));
 		}
+
 		return progressions;
 	}
 
@@ -36,5 +37,4 @@ public class ProgressionInputMapper {
 			nbt.contains("punishments")?ActionInputMapper.findPunishments(nbt): new ArrayList<Action>()
 		);
 	}
-	
 }

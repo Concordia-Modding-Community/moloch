@@ -8,11 +8,8 @@ import net.minecraft.world.server.ServerWorld;
 
 /**
  * Actions must run at least once, but changing doInitial affects whether the first time is immediate, or if it is run after an amount of time interval (with variance) 
- * 
- * 
  **/
 public abstract class Action {
-
 	private long id;
 	private boolean doInitial;
 	private int doCountTotal;
@@ -21,6 +18,7 @@ public abstract class Action {
 	private long variance;
 	private long lastRun;
 	private boolean active;
+
 	protected Action(long id, boolean doInitial, int doCountTotal, int doCountRemaining, int interval, long variance,
 			long lastRun, boolean active) {
 		super();
@@ -33,54 +31,70 @@ public abstract class Action {
 		this.lastRun = lastRun;
 		this.active = active;
 	}
+
+	abstract public Actions getType();
+	abstract public void run(Vector3d position, String sourceName, ServerWorld world);
+
 	public boolean isDoInitial() {
 		return doInitial;
 	}
+
 	public void setDoInitial(boolean doInitial) {
 		this.doInitial = doInitial;
 	}
+
 	public int getDoCountTotal() {
 		return doCountTotal;
 	}
+
 	public void setDoCountTotal(int doCountTotal) {
 		this.doCountTotal = doCountTotal;
 	}
+
 	public int getDoCountRemaining() {
 		return doCountRemaining;
 	}
+
 	public void setDoCountRemaining(int doCountRemaining) {
 		this.doCountRemaining = doCountRemaining;
 	}
+
 	public int getInterval() {
 		return interval;
 	}
+
 	public void setInterval(int interval) {
 		this.interval = interval;
 	}
+
 	public long getVariance() {
 		return variance;
 	}
+
 	public void setVariance(long variance) {
 		this.variance = variance;
 	}
+
 	public long getLastRun() {
 		return lastRun;
 	}
+
 	public void setLastRun(long lastRun) {
 		this.lastRun = lastRun;
 	}
+
 	public boolean isActive() {
 		return active;
 	}
+
 	public void setActive(boolean active) {
 		this.active = active;
 	}
+
 	public long getId() {
 		return id;
 	}
 
-	abstract public Actions getType();
-	abstract public void run(Vector3d position, String sourceName, ServerWorld world);
 	public void run(BlockPos blockPos, String sourceName, ServerWorld world) {
 		run(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), sourceName, world);
 		doCountRemaining--;
@@ -90,6 +104,4 @@ public abstract class Action {
 	public boolean shouldRunNow() {
 		return active && ((System.currentTimeMillis()-lastRun) > (interval+ (new Random().nextGaussian())*Math.sqrt(variance)));
 	}
-	
-	
 }

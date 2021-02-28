@@ -11,6 +11,7 @@ public class Desire {
 	private String item;
 	private int amountTotal;
 	private int amountRemaining;
+
 	protected Desire(long id, String item, int amountTotal, int amountRemaining) {
 		super();
 		this.id = id;
@@ -24,7 +25,8 @@ public class Desire {
 	}
 	
 	public Item getItem() {
-        ItemParser itemParser = new ItemParser(new StringReader(this.item), true);
+		ItemParser itemParser = new ItemParser(new StringReader(this.item), true);
+		
         try {
             itemParser.readItem();
             return itemParser.getItem();
@@ -32,9 +34,11 @@ public class Desire {
             return Items.BEDROCK;
         }
 	}
+
 	public void setItem(String item) {
 		this.item = item;
 	}
+
 	public void setItem(Item item) {
 		this.item = item.getName().toString();
 	}
@@ -42,15 +46,19 @@ public class Desire {
 	public int getAmountTotal() {
 		return amountTotal;
 	}
+
 	public void setAmountTotal(int amountTotal) {
 		this.amountTotal = amountTotal;
 	}
+
 	public int getAmountRemaining() {
 		return amountRemaining;
 	}
+
 	public void setAmountRemaining(int amountRemaining) {
 		this.amountRemaining = amountRemaining;
 	}
+
 	public void decrementAmountRemaining() {
 		this.setAmountRemaining(this.amountRemaining-1);
 	}
@@ -58,6 +66,4 @@ public class Desire {
 	public long getId() {
 		return id;
 	}
-	
-	
 }

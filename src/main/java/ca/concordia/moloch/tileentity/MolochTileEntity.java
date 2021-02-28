@@ -48,26 +48,13 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     private List<Action> actionQueue = new ArrayList<Action>();
     private List<Progression> progressions = new ArrayList<Progression>();
     private Progression currentProgression = null;
-    public Progression getCurrentProgression() {
-		return currentProgression;
-	}
 
-	private String molochName = this.getDefaultName().getString();
-    public String getMolochName() {
-		return molochName;
-	}
-
-	public void setMolochName(String molochName) {
-		this.molochName = molochName;
-	}
-
-	private boolean active = false;
-    
     //We haven't done this yet...
     private List<PlayerUUID> team = new ArrayList<PlayerUUID>();
+    private String molochName = this.getDefaultName().getString();
+	private boolean active = false;
     long lastConsumption = System.currentTimeMillis();
     
-
     public MolochTileEntity() {
         this(ModTileEntities.MOLOCH.get());
     }
@@ -76,6 +63,18 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         super(tileEntityType);
         this.setCustomName(this.getDefaultName());
     }
+
+    public String getMolochName() {
+		return molochName;
+	}
+
+	public void setMolochName(String molochName) {
+		this.molochName = molochName;
+	}
+
+    public Progression getCurrentProgression() {
+		return currentProgression;
+	}
 
     private IItemHandlerModifiable createHandler() {
         return new InvWrapper(this);
@@ -109,6 +108,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         if(!this.checkLootAndWrite(nbt)) {
             ItemStackHelper.saveAllItems(nbt, this.contents);
         }
+
         nbt.putString("molochName", this.molochName);
         nbt.putBoolean("active", this.active);
         
@@ -123,8 +123,6 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         this.read(nbt);
     }
     
-    
-
     public void read(CompoundNBT nbt) {
     	System.out.println("Reading NBT");
         this.contents = NonNullList.withSize(this.getSizeInventory(), ItemStack.EMPTY);
@@ -148,23 +146,23 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         this.actionQueue = buildActionQueue();
         
         this.currentProgression = findCurrentProgression();
-        
-        
     }
 
     private List<Action> buildActionQueue() {
     	System.out.println("Building Action Queue");
-    	List<Action> newQueue = new ArrayList<Action>();
-		for(Progression p: this.progressions) {
-			if(!p.isActive() && System.currentTimeMillis() > p.getStart()) {
-				for(Action a: p.getRewards()) {
+        List<Action> newQueue = new ArrayList<Action>();
+        
+		for(Progression progression : this.progressions) {
+			if(!progression.isActive() && System.currentTimeMillis() > progression.getStart()) {
+				for(Action a: progression.getRewards()) {
 					if(a.isActive()) newQueue.add(a);
 				}
-				for(Action a: p.getPunishments()) {
+				for(Action a: progression.getPunishments()) {
 					if(a.isActive()) newQueue.add(a);
 				}
 			}
-		}
+        }
+        
 		return newQueue;
 	}
 
@@ -228,7 +226,6 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         this.markDirty();
     }
 
-
     private void tickClient() {
         World world = this.getWorld();
 
@@ -240,33 +237,34 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     private void tickServer() {
-        if(currentProgression != null) { //There's a current progression, which means there's a current demand
-	        if(System.currentTimeMillis()-lastConsumption > CONSUME_TIME) {
-	        	lastConsumption = System.currentTimeMillis();
-	        	
-	    		for(Desire d: currentProgression.getDesires()) {
-	    			if(d.getAmountRemaining() > 0) {
-	    				if(contents.get(0).getItem().equals(d.getItem())) {
-	    					d.decrementAmountRemaining();
-	    					contents.get(0).setCount(contents.get(0).getCount()-1);
-	    					this.markDirtyServer();
-	    					break;
-	    				}
-	    			}
-	    		}
-	    		boolean complete = true;
-	    		for(Desire d: currentProgression.getDesires()) {
-	    			complete = complete && (d.getAmountRemaining() == 0);
-	    		}
-	    		if(complete) {
-	    			System.out.println("We have completed the current progression!");
-	    			activateActions((ServerWorld) this.getWorld(), this.pos, molochName, actionQueue, currentProgression.getRewards());
-	    			currentProgression.setActive(false);
-	    			this.currentProgression = findCurrentProgression();
-	    			this.markDirtyServer();
-	    		}
-	        }
-
+        //There's a current progression, which means there's a current demand
+        if(currentProgression != null && System.currentTimeMillis() - lastConsumption > CONSUME_TIME) { 
+            lastConsumption = System.currentTimeMillis();
+            
+            for(Desire desire : currentProgression.getDesires()) {
+                if(desire.getAmountRemaining() > 0) {
+                    if(contents.get(0).getItem().equals(desire.getItem())) {
+                        desire.decrementAmountRemaining();
+                        contents.get(0).setCount(contents.get(0).getCount()-1);
+                        this.markDirtyServer();
+                        break;
+                    }
+                }
+            }
+            
+            boolean complete = true;
+            
+            for(Desire desire : currentProgression.getDesires()) {
+                complete = complete && (desire.getAmountRemaining() == 0);
+            }
+            
+            if(complete) {
+                System.out.println("We have completed the current progression!");
+                activateActions((ServerWorld) this.getWorld(), this.pos, molochName, actionQueue, currentProgression.getRewards());
+                currentProgression.setActive(false);
+                this.currentProgression = findCurrentProgression();
+                this.markDirtyServer();
+            }
         }
         
         if(currentProgression != null && currentProgression.getEnd() < System.currentTimeMillis()) {
@@ -277,34 +275,39 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         }
         
         //TODO: Do we want to check this every tic? I think not.
-    	ArrayList<Action> finishedQueue = new ArrayList<Action>();
-    	for(Action a: actionQueue) {
-    		if(a.shouldRunNow()) a.run(this.pos, molochName, (ServerWorld) this.getWorld());
-    		if(!a.isActive()) finishedQueue.add(a);
-    	}
+        ArrayList<Action> finishedQueue = new ArrayList<Action>();
+        
+    	for(Action action : actionQueue) {
+    		if(action.shouldRunNow()) action.run(this.pos, molochName, (ServerWorld) this.getWorld());
+    		if(!action.isActive()) finishedQueue.add(action);
+        }
+        
     	actionQueue.removeAll(finishedQueue);
-        
-        
     }
 
 	public static void activateActions(ServerWorld actionWorld, BlockPos actionSource, String actionName, List<Action> targetQueue,
 			List<Action> actions) {
-		for(Action a: actions) {
-			a.setActive(true);
-			if(a.isDoInitial()) a.run(actionSource, actionName, actionWorld);
-			else a.setLastRun(System.currentTimeMillis());
-			if(a.isActive()) targetQueue.add(a);
+
+		for(Action action: actions) {
+            action.setActive(true);
+            
+			if(action.isDoInitial()) action.run(actionSource, actionName, actionWorld);
+            else action.setLastRun(System.currentTimeMillis());
+            
+			if(action.isActive()) targetQueue.add(action);
 		}
 	}
 
     private Progression findCurrentProgression() {
-    	System.out.println("Finding current Progression:");
-		for(Progression p: this.progressions) {
-			if(p.isActive()) {
-				System.out.println("\tfound " + p);
-				return p;
+        System.out.println("Finding current Progression:");
+        
+		for(Progression progression : this.progressions) {
+			if(progression.isActive()) {
+				System.out.println("\tfound " + progression);
+				return progression;
 			}
-		}
+        }
+        
 		return null;
 	}
 

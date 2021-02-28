@@ -9,7 +9,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.util.Constants;
 
 public class ActionInputMapper {
-
 	public static List<Action> findRewards(CompoundNBT nbt) {
 		return find(nbt, "rewards");
 	}
@@ -19,16 +18,20 @@ public class ActionInputMapper {
 	}
 	
 	public static List<Action> find(CompoundNBT nbt, String flavor) {
-		List<Action> acts = new LinkedList<Action>();
+		List<Action> actions = new LinkedList<Action>();
+
 		ListNBT list = nbt.getList(flavor, Constants.NBT.TAG_COMPOUND);
-		for(INBT a: list) {
-			acts.add(get((CompoundNBT) a));
+
+		for(INBT eNBT : list) {
+			actions.add(get((CompoundNBT) eNBT));
 		}
-		return acts;
+
+		return actions;
 	}
 
 	private static Action get(CompoundNBT nbt) {
 		int doCountTotal = nbt.contains("doCountTotal")?nbt.getInt("doCountTotal"):1;
+
 		switch(Actions.values()[nbt.getInt("type")]) {
 			case COMMAND:
 				return new Command(
@@ -42,11 +45,8 @@ public class ActionInputMapper {
 					nbt.getBoolean("active"), 
 					nbt.contains("command")?nbt.getString("command"):"/say Nobody told me what to do..."
 				);
+			default:
+				return null;
 		}
-		
-		return null;
 	}
-
-
-	
 }

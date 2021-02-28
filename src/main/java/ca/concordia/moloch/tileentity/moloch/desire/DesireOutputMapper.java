@@ -7,13 +7,14 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 
 public class DesireOutputMapper {
-
 	public static void insert(CompoundNBT nbt, List<Desire> desires) {
-		ListNBT des = new ListNBT();
-		for(Desire d: desires) {
-			des.add(getNBT(d));
+		ListNBT desireNBTs = new ListNBT();
+
+		for(Desire desire : desires) {
+			desireNBTs.add(getNBT(desire));
 		}
-		nbt.put("desires", des);
+
+		nbt.put("desires", desireNBTs);
 	}
 
 	private static INBT getNBT(Desire d) {
@@ -24,5 +25,4 @@ public class DesireOutputMapper {
 		nbt.putInt("amountRemaining", d.getAmountRemaining());
 		return nbt;
 	}
-	
 }

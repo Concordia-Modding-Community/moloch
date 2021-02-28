@@ -9,7 +9,6 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 
 public class ProgressionOutputMapper {
-
 	public static void insert(CompoundNBT nbt, List<Progression> progressions) {
 		ListNBT progs = new ListNBT();
 		for(Progression p: progressions) {
@@ -29,5 +28,4 @@ public class ProgressionOutputMapper {
 		ActionOutputMapper.insertPunishments(nbt, p.getPunishments());
 		return nbt;
 	}
-
 }

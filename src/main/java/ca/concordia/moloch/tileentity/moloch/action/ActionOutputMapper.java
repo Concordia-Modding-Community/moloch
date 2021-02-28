@@ -7,7 +7,6 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 
 public class ActionOutputMapper {
-
 	public static void insertRewards(CompoundNBT nbt, List<Action> actions) {
 		insert(nbt, "rewards", actions);
 	}
@@ -18,6 +17,7 @@ public class ActionOutputMapper {
 	
 	public static void insert(CompoundNBT nbt, String flavor, List<Action> actions) {
 		ListNBT acts = new ListNBT();
+		
 		try {
 			for(Action a: actions) {
 				acts.add(getNBT(a));
@@ -25,6 +25,7 @@ public class ActionOutputMapper {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		nbt.put(flavor, acts);
 	}
 
@@ -48,7 +49,4 @@ public class ActionOutputMapper {
 		
 		return nbt;
 	}
-
-
-	
 }
