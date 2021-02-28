@@ -1,7 +1,7 @@
 # moloch
 Forge 1.16 Moloch Mod
 
-I (@ramou) have removed the admin interface and now you can interact with your moloch block via commandline only. All times are in miliseconds from the epoch, so use `1614449380570lL` notation for starts and ends. `interval` is small enough that you can just put an unmarked number, but `variance` should use the `L` notation as the desired standard deviation will be the square of the variance... why don't I just ask for stdev? Maybe I should, someone post an issue (I spend too much time with stochastic anlysis).
+All times are in miliseconds from the epoch, so use `1614449380570lL` notation for starts and ends. `interval` is small enough that you can just put an unmarked number, but `variance` should use the `L` notation as the desired standard deviation will be the square of the variance... why don't I just ask for stdev? Maybe I should, someone post an issue (I spend too much time with stochastic anlysis).
 
 ## Moloch
 Each moloch block represents an aspect of the angry all-consuming Moloch! Moloch progresses through sequences of desires, which when met result in rewards for the affected folks, and when not met, result in punishment. As such, Moloch can be treated as a sequence of progressions that start and end.
