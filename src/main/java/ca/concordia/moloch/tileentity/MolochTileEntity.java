@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import com.mojang.authlib.GameProfile;
 
 import ca.concordia.moloch.container.MolochContainer;
+import ca.concordia.moloch.init.ModSounds;
 import ca.concordia.moloch.init.ModTileEntities;
 import ca.concordia.moloch.tileentity.moloch.action.Action;
 import ca.concordia.moloch.tileentity.moloch.desire.Desire;
@@ -36,6 +37,7 @@ import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.datafix.fixes.PlayerUUID;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -66,6 +68,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     private List<UUID> subjects = new ArrayList<UUID>();
     private String molochName = this.getDefaultName().getString();
     long lastConsumption = System.currentTimeMillis();
+	private long lastPlaySound;
     
     public MolochTileEntity() {
         this(ModTileEntities.MOLOCH.get());
@@ -377,6 +380,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     private void tickClient() {
+    	
         if(currentProgression == null) return;
         if(!currentProgression.isActive()) return;
 
@@ -398,6 +402,12 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         
         //TODO: Do we want to check this every tic? I think not.
         tickActions();
+        
+    	if(System.currentTimeMillis() - lastPlaySound > 15000 + Math.random()*5000) {
+    		System.out.println("Playing sound");
+    		world.playSound(null, pos, ModSounds.molochBreathe, SoundCategory.BLOCKS, 1F, 1F);
+    		lastPlaySound = System.currentTimeMillis();
+    	}
     }
 
     @Override

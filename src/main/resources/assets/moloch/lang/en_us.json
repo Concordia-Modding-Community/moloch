@@ -1,6 +1,11 @@
 {
+
+    "moloch.subtitle.moloch_breathing": "Moloch breathing",
     "tileentity.moloch.moloch": "Moloch",
     "block.moloch.moloch": "Moloch's Heart",
     "item.moloch.operator_key": "Operator Key",
     "itemGroup.moloch": "Moloch Mod"
+    
+      
+    
 }
