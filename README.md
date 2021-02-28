@@ -11,7 +11,7 @@ In each progression, there is a list of desired items with a desired amount asso
  * You can inspect your moloch with `/data get block <targetPos>`
 Keep in mind that since this is the vanilla data command, `<targetPos>` can either be x, y, z coodinates or any of the usual target selectors. Just make sure you've got a moloch block to edit before you start messing around or it will be very boring for you.
 
-```json
+```
 {
 	molochName: "Moloch", 
 	subjects: [], 
@@ -37,7 +37,7 @@ The basic structure has the `molochName` (defaults to "Moloch") that users will 
  * You can append multiple progressions and check all of them:
  `/data get block <targetPos> progressions` or each of them by index:
  `/data get block <targetPos> progressions[<i>]` where `<i>` is the 0-based index of the progression you want to inspect:
-```json
+```
 {
   punishments: [], 
   desires: [], 
@@ -64,7 +64,7 @@ Desires are the way the things moloch wants are shown.
  * You can append multiple desires and check all of them:
  `/data get block <targetPos> progressions[<i>].desires` or each of them by index:
  `/data get block <targetPos> progressions[<i>].desires[<j>]` where `<j>` is the 0-based index of the desire you want to inspect in progression with 0-based index `<i>`:
-```json
+```
 {
   id: 1L, 
   item: "minecraft:apple", 
@@ -93,7 +93,7 @@ with the only difference in the above being whether we append to the `rewards` l
  * You can append multiple rewards/punishments and check all of them:
  `/data get block <targetPos> progressions[<i>].rewards` or each of them by index:
  `/data get block <targetPos> progressions[<i>].rewards[<j>]` where `<j>` is the 0-based index of the rewards you want to inspect in progression with 0-based index `<i>`:
-```json
+```
 {
    id: 1L, 
    type: 0, 
