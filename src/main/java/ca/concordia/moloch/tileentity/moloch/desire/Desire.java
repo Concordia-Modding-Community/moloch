@@ -42,7 +42,7 @@ public class Desire implements INBTSerializable<CompoundNBT> {
             itemParser.readItem();
             return itemParser.getItem();
         } catch(Exception e) {
-            return Items.BEDROCK;
+            return Items.BARRIER;
         }
 	}
 
