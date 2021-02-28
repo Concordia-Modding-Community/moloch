@@ -21,11 +21,12 @@ public class DesireInputMapper {
 	}
 
 	private static Desire get(CompoundNBT nbt) {
+		int amountTotal = nbt.contains("amountTotal")?nbt.getInt("amountTotal"):1;
 		return new Desire(
 			nbt.getLong("id"), 
 			nbt.getString("item"), 
-			nbt.getInt("amountTotal"), 
-			nbt.getInt("amountRemaining")
+			amountTotal, 
+			nbt.contains("amountRemaining")?nbt.getInt("amountRemaining"):amountTotal
 		);
 	}
 	

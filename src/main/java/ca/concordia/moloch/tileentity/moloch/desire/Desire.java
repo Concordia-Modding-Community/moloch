@@ -15,8 +15,8 @@ public class Desire {
 		super();
 		this.id = id;
 		this.item = item;
-		this.amountTotal = amountTotal;
-		this.amountRemaining = amountRemaining;
+		this.amountTotal = Math.max(0, amountTotal);
+		this.amountRemaining = Math.max(0, amountRemaining);
 	}
 
 	public String getItemName() {
