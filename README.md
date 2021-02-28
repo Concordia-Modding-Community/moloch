@@ -15,8 +15,8 @@ Keep in mind that since this is the vanilla data command, `<targetPos>` can eith
 
 ### Progressions
  * Building a full progression is a bit long for one command, so you may want to break it up and start with a blank progression: 
- `/data modify block <targetPos> progressions prepend value {id: <id>, start: <start>, end: <end>, active: 0b}`
- * You can prepend multiple progressions and check all of them:
+ `/data modify block <targetPos> progressions append value {id: <id>, start: <start>, end: <end>, active: 0b}`
+ * You can append multiple progressions and check all of them:
  `/data get block <targetPos> progressions` or each of them by index:
  `/data get block <targetPos> progressions[<i>]` where `<i>` is the 0-based index of the progression you want to inspect:
 ```json
@@ -41,9 +41,9 @@ For now, the `desires`, `rewards` and `punishments` act as placeholder, defaulti
 
 ### Desires
 Desires are the way the things moloch wants are shown.
- * To add desires to the new progression, you can do something lie:
-`/data modify block <targetPos> progressions[<i>].desires prepend value {id: 1, item: "<item>", amountTotal: 4, amountRemaining: 2}`
- * You can prepend multiple desires and check all of them:
+ * To add desires to the new progression, you can do something like:
+`/data modify block <targetPos> progressions[<i>].desires append value {id: 1, item: "<item>", amountTotal: 4, amountRemaining: 2}`
+ * You can append multiple desires and check all of them:
  `/data get block <targetPos> progressions[<i>].desires` or each of them by index:
  `/data get block <targetPos> progressions[<i>].desires[<j>]` where `<j>` is the 0-based index of the desire you want to inspect in progression with 0-based index `<i>`:
 ```json
@@ -61,8 +61,41 @@ When active as the current progression, the first three desired items will be vi
  * You can remove desires withing a progression by index as well:
  `/data remove block <targetPos> progressions[<i>].desires[<j>]`
  * Lastly, you can update specific fields of a desire within a given progression:
- `/data modify block <targetPos> progressions[<i>]..desires[<j>].item set value "minecraft:cake"` (Who doesn't like cake?!?! You'll note that your can ask for a ton of cake, as Moloch is not bound by mortal restrictions on stacks of cake)
+ `/data modify block <targetPos> progressions[<i>].desires[<j>].item set value "minecraft:cake"` (Who doesn't like cake?!?! You'll note that your can ask for a ton of cake, as Moloch is not bound by mortal restrictions on stacks of cake)
 
 ### Rewards/Punishments
 Rewards and Punishments use <actions>. When all desires are met for a progression, all rewards become active, running a number of times based
+
+ * To add rewards and punishments to the new progression, you can do something like:
+`/data modify block <targetPos> progressions[<i>].rewards append value {type: 0, id: <j>, doInitial: true, doCountTotal: 4, doCountRemaining: 3, active: 0b, command: "<command>"}`
+or
+`/data modify block <targetPos> progressions[<i>].punishments append value {type: 0, id: <j>, doInitial: true, doCountTotal: 4, doCountRemaining: 3, active: 0b, command: "<command>"}`
+with the only difference in the above being whether we append to the `rewards` list or the `punishments` list.
+
+ * You can append multiple rewards/punishments and check all of them:
+ `/data get block <targetPos> progressions[<i>].rewards` or each of them by index:
+ `/data get block <targetPos> progressions[<i>].rewards[<j>]` where `<j>` is the 0-based index of the rewards you want to inspect in progression with 0-based index `<i>`:
+```json
+{
+   id: 1L, 
+   type: 0, 
+   doInitial: 1b, 
+   doCountTotal: 1,
+   doCountRemaining: 1, 
+   lastRun: 0L, 
+   variance: 0L, 
+   active: 0b, 
+   interval: 0, 
+   command: "/say REWARD!"
+}
+```
+
+As with progressions/desires, the `<id>` should be unique to the rewards/punishments in this moloch (and progression), but it is not currently checked. 
+
+`doInitial` indicates whether this action will run immediately when queued, so, for example, a reward would run immediately after the last desired item were consumed in a progression. This is the default behaviour, and can be omitted if this is what one wants for a reward. There are cases where one does not want an immediate action, and in this case one can use `doInitial: 0b`. `doCountTotal` represents how many times the action will occur and must be a positive integer, which will default to `1` if omitted. `doCountRemaining` must similarly be a positive integer, and will default to whatever `doCountTotal` is if omitted. 
+
+If an action is to occur more than once, `interval` specifies the mean time between occurrences, and defaults to `10000` (10 seconds), where variance represents the statistical variance and so 68% of the time the action will run between the `interval` - the square root of the `variance` and the `interval` + the square root of the variance. If the `interval` were 20000 (20 seconds) and the `variance` were 9000000 (strandard deviation of 3000 (3seconds)) then 68% of the time Moloch would wait between 17 and 23 seconds before running the next action.
+
+The `type` represents the specific nature of the action. Currently, only the command action (`type: 0`) is implemented, and it takes a `command` which is exactly the sort of single command you might find in a command block, like the above `command: "/say REWARD!"` which will cause Moloch to speak (using the `molochName` you set above) the word `REWARD!`. I'm taking requests for additional types of action besides a basic command action, since some things are either tricky or downright impossible to do with that.
+
 
