@@ -43,7 +43,7 @@ public abstract class Action implements INBTSerializable<CompoundNBT> {
 		this.doInitial = doInitial;
 		this.doCountTotal = Math.max(0,doCountTotal);
 		this.doCountRemaining = Math.max(0, doCountRemaining);
-		this.interval = interval;
+		this.interval =  Math.max(1000, interval);
 		this.variance = variance;
 		this.lastRun = lastRun;
 		this.active = active;

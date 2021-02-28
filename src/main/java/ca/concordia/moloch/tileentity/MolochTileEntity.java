@@ -276,17 +276,14 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
 
     /**
      * Attempts to run actions in queue.
-     *
-     * Just polling the whole queue and reinserting if they action is still active.
-     * Method used to be O(n^2) because of removeAll but now is O(n).
      */
     private void tickActions() {
-        for(int i = 0; i < actionQueue.size(); i++) {
-            Action action = actionQueue.poll();
-
+    	Queue<Action> newQueue = new LinkedList<Action>();
+        for(Action action: actionQueue) {
             if(action.shouldRunNow()) action.run(this.pos, molochName, (ServerWorld) this.getWorld());
-            if(action.isActive()) actionQueue.add(action);
+            if(action.isActive()) newQueue.add(action);
         }
+        actionQueue = newQueue;
     }
 
 	public static void activateActions(ServerWorld actionWorld, BlockPos actionSource, String actionName, Queue<Action> targetQueue,
@@ -318,11 +315,8 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     private Progression findCurrentProgression() {
-        System.out.println("Finding current Progression:");
-        
 		for(Progression progression : this.progressions) {
 			if(progression.isActive()) {
-				System.out.println("\tfound " + progression);
 				return progression;
 			}
         }

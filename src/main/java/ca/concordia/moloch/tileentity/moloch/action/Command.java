@@ -19,7 +19,7 @@ public class Command extends Action {
 	public Command() {
 		super();
 
-		this.command = "say Nobody told me what to do...";
+		this.command = "/say Nobody told me what to do...";
 	}
 
 	public Command(long id, boolean doInitial, int doCountTotal, int doCountRemaining, int interval, long variance,
