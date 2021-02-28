@@ -1,4 +1,4 @@
-package ca.concordia.moloch.tileentity.moloch.progreesion.mapper;
+package ca.concordia.moloch.tileentity.moloch.progression;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -8,7 +8,6 @@ import ca.concordia.moloch.tileentity.moloch.action.Action;
 import ca.concordia.moloch.tileentity.moloch.action.ActionInputMapper;
 import ca.concordia.moloch.tileentity.moloch.desire.Desire;
 import ca.concordia.moloch.tileentity.moloch.desire.DesireInputMapper;
-import ca.concordia.moloch.tileentity.moloch.progression.Progression;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
