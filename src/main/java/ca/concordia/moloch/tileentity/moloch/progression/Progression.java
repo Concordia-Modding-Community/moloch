@@ -96,14 +96,21 @@ public class Progression implements INBTSerializable<CompoundNBT> {
 		return id;
 	}
 
+	private static class NBT {
+		public static final String ID = "id";
+		public static final String START = "start";
+		public static final String END = "end";
+		public static final String ACTIVE = "active";
+	}
+
 	@Override
 	public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         
-		nbt.putLong("id", this.getId());
-		nbt.putLong("start",this.getStart());
-		nbt.putLong("end", this.getEnd());
-        nbt.putBoolean("active", this.isActive());
+		nbt.putLong(NBT.ID, this.getId());
+		nbt.putLong(NBT.START,this.getStart());
+		nbt.putLong(NBT.END, this.getEnd());
+        nbt.putBoolean(NBT.ACTIVE, this.isActive());
         
 		new DesireMapper().insert(nbt, this.getDesires());
 		new ActionMapper().insertRewards(nbt, this.getRewards());
@@ -114,12 +121,13 @@ public class Progression implements INBTSerializable<CompoundNBT> {
 
 	@Override
 	public void deserializeNBT(CompoundNBT nbt) {
-		if(nbt.contains("id")) this.id = nbt.getLong("id");
-		if(nbt.contains("start")) this.start = nbt.getLong("start");
-		if(nbt.contains("end")) this.end = nbt.getLong("end");
-		if(nbt.contains("active")) this.active = nbt.getBoolean("active");
-		if(nbt.contains("desires")) this.desires = new DesireMapper().find(nbt);
-		if(nbt.contains("rewards")) this.rewards = new ActionMapper().findRewards(nbt);
-		if(nbt.contains("punishments")) this.punishments = new ActionMapper().findPunishments(nbt);
+		if(nbt.contains(NBT.ID)) this.id = nbt.getLong(NBT.ID);
+		if(nbt.contains(NBT.START)) this.start = nbt.getLong(NBT.START);
+		if(nbt.contains(NBT.END)) this.end = nbt.getLong(NBT.END);
+		if(nbt.contains(NBT.ACTIVE)) this.active = nbt.getBoolean(NBT.ACTIVE);
+
+		this.desires = new DesireMapper().find(nbt);
+		this.rewards = new ActionMapper().findRewards(nbt);
+		this.punishments = new ActionMapper().findPunishments(nbt);
 	}
 }

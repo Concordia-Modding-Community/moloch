@@ -4,9 +4,13 @@ import ca.concordia.moloch.utils.NBTMapper;
 import net.minecraft.nbt.CompoundNBT;
 
 public class ProgressionMapper extends NBTMapper<Progression> {
+	private static class NBT {
+		public static final String PROGRESSIONS = "progressions";
+	}
+    
     @Override
     public String getListTag() {
-        return "progressions";
+        return NBT.PROGRESSIONS;
     }
 
     @Override

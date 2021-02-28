@@ -4,9 +4,13 @@ import ca.concordia.moloch.utils.NBTMapper;
 import net.minecraft.nbt.CompoundNBT;
 
 public class DesireMapper extends NBTMapper<Desire> {
+    private static class NBT {
+        public static final String DESIRES = "desires";
+    }
+
     @Override
     public String getListTag() {
-        return "desires";
+        return NBT.DESIRES;
     }
 
     @Override

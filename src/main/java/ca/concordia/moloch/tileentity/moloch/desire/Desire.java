@@ -78,23 +78,30 @@ public class Desire implements INBTSerializable<CompoundNBT> {
 		return id;
 	}
 
+	private static class NBT {
+		public static final String ID = "id";
+		public static final String ITEM = "item";
+		public static final String AMOUNT_TOTAL = "amountTotal";
+		public static final String AMOUNT_REMAINING = "amountRemaining";
+	}
+
 	@Override
 	public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         
-		nbt.putLong("id", this.getId());
-		nbt.putString("item", this.getItemName());
-		nbt.putInt("amountTotal", this.getAmountTotal());
-        nbt.putInt("amountRemaining", this.getAmountRemaining());
+		nbt.putLong(NBT.ID, this.getId());
+		nbt.putString(NBT.ITEM, this.getItemName());
+		nbt.putInt(NBT.AMOUNT_TOTAL, this.getAmountTotal());
+        nbt.putInt(NBT.AMOUNT_REMAINING, this.getAmountRemaining());
         
 		return nbt;
 	}
 
 	@Override
 	public void deserializeNBT(CompoundNBT nbt) {
-		if(nbt.contains("id")) this.id = nbt.getLong("id");
-		if(nbt.contains("item")) this.item = nbt.getString("item");
-		if(nbt.contains("amountTotal")) this.amountTotal = nbt.getInt("amountTotal");
-		this.amountRemaining = nbt.contains("amountRemaining") ? nbt.getInt("amountRemaining") : amountTotal;
+		if(nbt.contains(NBT.ID)) this.id = nbt.getLong(NBT.ID);
+		if(nbt.contains(NBT.ITEM)) this.item = nbt.getString(NBT.ITEM);
+		if(nbt.contains(NBT.AMOUNT_TOTAL)) this.amountTotal = nbt.getInt(NBT.AMOUNT_TOTAL);
+		this.amountRemaining = nbt.contains(NBT.AMOUNT_REMAINING) ? nbt.getInt(NBT.AMOUNT_REMAINING) : amountTotal;
 	}
 }

@@ -22,7 +22,11 @@ public abstract class NBTMapper<T extends INBTSerializable<CompoundNBT>> {
 		ListNBT list = nbt.getList(getListTag(), Constants.NBT.TAG_COMPOUND);
 
 		for(INBT eNBT : list) {
-			instances.add(getInstance((CompoundNBT) eNBT));
+            T instance = getInstance((CompoundNBT) eNBT);
+
+            if(instance == null) continue;
+
+			instances.add(instance);
 		}
 
 		return instances;
@@ -32,7 +36,11 @@ public abstract class NBTMapper<T extends INBTSerializable<CompoundNBT>> {
         ListNBT nbts = new ListNBT();
 
         for(T instance : instances) {
-            nbts.add(getNBT(instance));
+            CompoundNBT instanceNBT = getNBT(instance);
+
+            if(instanceNBT == null) continue;
+
+            nbts.add(instanceNBT);
         }
         
         nbt.put(getListTag(), nbts);

@@ -1,7 +1,9 @@
 package ca.concordia.moloch.tileentity;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.annotation.Nonnull;
 
@@ -44,14 +46,13 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     private IItemHandlerModifiable items = createHandler();
     private LazyOptional<IItemHandlerModifiable> itemHandler = LazyOptional.of(() -> items);
 
-    private List<Action> actionQueue = new ArrayList<Action>();
+    private Queue<Action> actionQueue = new LinkedList<Action>();
     private List<Progression> progressions = new ArrayList<Progression>();
     private Progression currentProgression = null;
 
     //We haven't done this yet...
     private List<PlayerUUID> team = new ArrayList<PlayerUUID>();
     private String molochName = this.getDefaultName().getString();
-	private boolean active = false;
     long lastConsumption = System.currentTimeMillis();
     
     public MolochTileEntity() {
@@ -98,6 +99,10 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     	return new MolochContainer(id, playerInventory, this);
     }
 
+    private static class NBT {
+		public static final String MOLOCH_NAME = "molochName";
+	}
+
     @Override
     public CompoundNBT write(CompoundNBT nbt) {
         super.write(nbt);
@@ -107,8 +112,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
             ItemStackHelper.saveAllItems(nbt, this.contents);
         }
 
-        nbt.putString("molochName", this.molochName);
-        nbt.putBoolean("active", this.active);
+        nbt.putString(NBT.MOLOCH_NAME, this.molochName);
         
         new ProgressionMapper().insert(nbt, progressions);
 
@@ -129,24 +133,21 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
             ItemStackHelper.loadAllItems(nbt, this.contents);
         }
 
-        if(nbt.contains("molochName")) {
-        	this.molochName = nbt.getString("molochName");
-        }
-
-        if(nbt.contains("active")) {
-        	this.active = nbt.getBoolean("active");
+        if(nbt.contains(NBT.MOLOCH_NAME)) {
+        	this.molochName = nbt.getString(NBT.MOLOCH_NAME);
         }
 
         this.progressions = new ProgressionMapper().find(nbt);
         
         this.actionQueue = buildActionQueue();
+
         this.currentProgression = findCurrentProgression();
     }
 
-    private List<Action> buildActionQueue() {
+    private Queue<Action> buildActionQueue() {
         System.out.println("Building Action Queue");
         
-        List<Action> newQueue = new ArrayList<Action>();
+        Queue<Action> newQueue = new LinkedList<Action>();
         
 		for(Progression progression : this.progressions) {
 			if(!progression.isActive() && System.currentTimeMillis() > progression.getStart()) {
@@ -223,69 +224,68 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         this.markDirty();
     }
 
-    private void tickClient() {
+    /**
+     * Checks if all desires have no remaining amount of items.
+     */
+    private boolean desiresAreComplete() {
+        if(currentProgression == null) return false;
+
+        for(Desire desire : currentProgression.getDesires()) {
+            if(desire.getAmountRemaining() != 0) return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if the current progression (if any) has ran out of time.
+     */
+    private boolean ranOutOfTime() {
+        if(currentProgression == null) return false;
+
+        return currentProgression.getEnd() < System.currentTimeMillis();
+    }
+
+    /**
+     * Attempts to consume the current item in Moloch's inventory at CONSUME_TIME rate.
+     */
+    private void tickConsumption() {
         if(currentProgression == null) return;
-        if(!currentProgression.isActive()) return;
+        if(System.currentTimeMillis() - lastConsumption < CONSUME_TIME) return;
 
-        World world = this.getWorld();
+        lastConsumption = System.currentTimeMillis();
 
-        if (this.world.rand.nextInt(100) < 10) {
-            BlockPos blockPos = this.getPos();
-            world.addParticle(ParticleTypes.LAVA, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0,
-                    0);
+        for(Desire desire : currentProgression.getDesires()) {
+            if(desire.getAmountRemaining() == 0) continue;
+
+            if(!contents.get(0).getItem().equals(desire.getItem())) continue;
+
+            desire.decrementAmountRemaining();
+
+            contents.get(0).setCount(contents.get(0).getCount()-1);
+
+            this.markDirtyServer();
+
+            return;
         }
     }
 
-    private void tickServer() {
-        //There's a current progression, which means there's a current demand
-        if(currentProgression != null && System.currentTimeMillis() - lastConsumption > CONSUME_TIME) { 
-            lastConsumption = System.currentTimeMillis();
-            
-            for(Desire desire : currentProgression.getDesires()) {
-                if(desire.getAmountRemaining() > 0) {
-                    if(contents.get(0).getItem().equals(desire.getItem())) {
-                        desire.decrementAmountRemaining();
-                        contents.get(0).setCount(contents.get(0).getCount()-1);
-                        this.markDirtyServer();
-                        break;
-                    }
-                }
-            }
-            
-            boolean complete = true;
-            
-            for(Desire desire : currentProgression.getDesires()) {
-                complete = complete && (desire.getAmountRemaining() == 0);
-            }
-            
-            if(complete) {
-                System.out.println("We have completed the current progression!");
-                activateActions((ServerWorld) this.getWorld(), this.pos, molochName, actionQueue, currentProgression.getRewards());
-                currentProgression.setActive(false);
-                this.currentProgression = findCurrentProgression();
-                this.markDirtyServer();
-            }
+    /**
+     * Attempts to run actions in queue.
+     *
+     * Just polling the whole queue and reinserting if they action is still active.
+     * Method used to be O(n^2) because of removeAll but now is O(n).
+     */
+    private void tickActions() {
+        for(int i = 0; i < actionQueue.size(); i++) {
+            Action action = actionQueue.poll();
+
+            if(action.shouldRunNow()) action.run(this.pos, molochName, (ServerWorld) this.getWorld());
+            if(action.isActive()) actionQueue.add(action);
         }
-        
-        if(currentProgression != null && currentProgression.getEnd() < System.currentTimeMillis()) {
-			activateActions((ServerWorld) this.getWorld(), this.pos, molochName, actionQueue, currentProgression.getPunishments());
-        	currentProgression.setActive(false);
-        	this.currentProgression = findCurrentProgression();
-        	this.markDirtyServer();
-        }
-        
-        //TODO: Do we want to check this every tic? I think not.
-        ArrayList<Action> finishedQueue = new ArrayList<Action>();
-        
-    	for(Action action : actionQueue) {
-    		if(action.shouldRunNow()) action.run(this.pos, molochName, (ServerWorld) this.getWorld());
-    		if(!action.isActive()) finishedQueue.add(action);
-        }
-        
-    	actionQueue.removeAll(finishedQueue);
     }
 
-	public static void activateActions(ServerWorld actionWorld, BlockPos actionSource, String actionName, List<Action> targetQueue,
+	public static void activateActions(ServerWorld actionWorld, BlockPos actionSource, String actionName, Queue<Action> targetQueue,
 			List<Action> actions) {
 
 		for(Action action: actions) {
@@ -296,7 +296,22 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
             
 			if(action.isActive()) targetQueue.add(action);
 		}
-	}
+    }
+    
+    private void activateActions(List<Action> actionList) {
+        activateActions((ServerWorld) this.getWorld(), this.pos, molochName, actionQueue, actionList);
+        currentProgression.setActive(false);
+        this.currentProgression = findCurrentProgression();
+        this.markDirtyServer();
+    }
+
+    private void activateRewards() {
+        activateActions(currentProgression.getRewards());
+    }
+
+    private void activatePunishments() {
+        activateActions(currentProgression.getPunishments());
+    }
 
     private Progression findCurrentProgression() {
         System.out.println("Finding current Progression:");
@@ -320,6 +335,30 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         } else {
             this.tickServer();
         }
+    }
+
+    private void tickClient() {
+        if(currentProgression == null) return;
+        if(!currentProgression.isActive()) return;
+
+        World world = this.getWorld();
+
+        if (this.world.rand.nextInt(100) < 10) {
+            BlockPos blockPos = this.getPos();
+            world.addParticle(ParticleTypes.LAVA, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 0, 0,
+                    0);
+        }
+    }
+
+    private void tickServer() {
+        tickConsumption();
+
+        if(desiresAreComplete()) activateRewards();
+
+        if(ranOutOfTime()) activatePunishments();
+        
+        //TODO: Do we want to check this every tic? I think not.
+        tickActions();
     }
 
     @Override

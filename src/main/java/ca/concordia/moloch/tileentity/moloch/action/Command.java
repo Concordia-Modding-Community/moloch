@@ -58,19 +58,23 @@ public class Command extends Action {
         world.getServer().getCommandManager().handleCommand(commandSource, this.command);
 	}
 
+	private static class NBT {
+		public static final String COMMAND = "command";
+	}
+
 	@Override
 	public void deserializeNBT(CompoundNBT nbt) {
 		super.deserializeNBT(nbt);
 
-		if(nbt.contains("command")) this.command = nbt.getString("command");
+		if(nbt.contains(NBT.COMMAND)) this.command = nbt.getString(NBT.COMMAND);
 	}
 
 	@Override
 	public CompoundNBT serializeNBT() {
 		CompoundNBT nbt = super.serializeNBT();
-		
-		nbt.putString("command", this.getCommand());
 
-		return super.serializeNBT();
+		nbt.putString(NBT.COMMAND, this.getCommand());
+
+		return nbt;
 	}
 }

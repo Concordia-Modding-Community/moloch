@@ -121,32 +121,44 @@ public abstract class Action implements INBTSerializable<CompoundNBT> {
 		return active && ((System.currentTimeMillis()-lastRun) > (interval+ (new Random().nextGaussian())*Math.sqrt(variance)));
 	}
 
+	public static class NBT {
+		public static final String ID = "id";
+		public static final String TYPE = "type";
+		public static final String DO_INITIAL = "doInitial";
+		public static final String DO_COUNT_TOTAL = "doCountTotal";
+		public static final String DO_COUNT_REMAINING = "doCountRemaining";
+		public static final String INTERVAL = "interval";
+		public static final String VARIANCE = "variance";
+		public static final String LAST_RUN = "lastRun";
+		public static final String ACTIVE = "active";
+	}
+
 	@Override
 	public CompoundNBT serializeNBT() {
 		CompoundNBT nbt = new CompoundNBT();
         
-		nbt.putLong("id", this.getId());
-		nbt.putInt("type", this.getType().ordinal());
-		nbt.putBoolean("doInitial", this.isDoInitial());
-		nbt.putInt("doCountTotal", this.getDoCountTotal());
-		nbt.putInt("doCountRemaining", this.getDoCountRemaining());
-		nbt.putInt("interval", this.getInterval());
-		nbt.putLong("variance", this.getVariance());
-		nbt.putLong("lastRun", this.getLastRun());
-		nbt.putBoolean("active", this.isActive());
+		nbt.putLong(NBT.ID, this.getId());
+		nbt.putInt(NBT.TYPE, this.getType().ordinal());
+		nbt.putBoolean(NBT.DO_INITIAL, this.isDoInitial());
+		nbt.putInt(NBT.DO_COUNT_TOTAL, this.getDoCountTotal());
+		nbt.putInt(NBT.DO_COUNT_REMAINING, this.getDoCountRemaining());
+		nbt.putInt(NBT.INTERVAL, this.getInterval());
+		nbt.putLong(NBT.VARIANCE, this.getVariance());
+		nbt.putLong(NBT.LAST_RUN, this.getLastRun());
+		nbt.putBoolean(NBT.ACTIVE, this.isActive());
 		
 		return nbt;
 	}
 
 	@Override
 	public void deserializeNBT(CompoundNBT nbt) {
-		if(nbt.contains("id")) this.id = nbt.getLong("id");
-		if(nbt.contains("doInitial")) this.doInitial = nbt.getBoolean("doInitial");
-		if(nbt.contains("doCountTotal")) this.doCountTotal = nbt.getInt("doCountTotal");
-		this.doCountRemaining = nbt.contains("doCountRemaining")?nbt.getInt("doCountRemaining"):doCountTotal;
-		if(nbt.contains("interval")) this.interval = nbt.getInt("interval");
-		if(nbt.contains("variance")) this.variance = nbt.getLong("variance");
-		if(nbt.contains("lastRun")) this.lastRun = nbt.getLong("lastRun");
-		if(nbt.contains("active")) this.active = nbt.getBoolean("active");
+		if(nbt.contains(NBT.ID)) this.id = nbt.getLong(NBT.ID);
+		if(nbt.contains(NBT.DO_INITIAL)) this.doInitial = nbt.getBoolean(NBT.DO_INITIAL);
+		if(nbt.contains(NBT.DO_COUNT_TOTAL)) this.doCountTotal = nbt.getInt(NBT.DO_COUNT_TOTAL);
+		this.doCountRemaining = nbt.contains(NBT.DO_COUNT_REMAINING) ? nbt.getInt(NBT.DO_COUNT_REMAINING) : this.doCountTotal;
+		if(nbt.contains(NBT.INTERVAL)) this.interval = nbt.getInt(NBT.INTERVAL);
+		if(nbt.contains(NBT.VARIANCE)) this.variance = nbt.getLong(NBT.VARIANCE);
+		if(nbt.contains(NBT.LAST_RUN)) this.lastRun = nbt.getLong(NBT.LAST_RUN);
+		if(nbt.contains(NBT.ACTIVE)) this.active = nbt.getBoolean(NBT.ACTIVE);
 	}
 }
