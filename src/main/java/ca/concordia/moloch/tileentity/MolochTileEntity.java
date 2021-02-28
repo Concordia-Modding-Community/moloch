@@ -99,6 +99,10 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     	return new MolochContainer(id, playerInventory, this);
     }
 
+    public Queue<Action> getActionQueue() {
+        return actionQueue;
+    }
+
     private static class NBT {
 		public static final String MOLOCH_NAME = "molochName";
 	}

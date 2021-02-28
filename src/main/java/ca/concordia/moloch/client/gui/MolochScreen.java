@@ -1,7 +1,9 @@
 package ca.concordia.moloch.client.gui;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -9,6 +11,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import ca.concordia.moloch.Resources;
 import ca.concordia.moloch.container.MolochContainer;
 import ca.concordia.moloch.tileentity.MolochTileEntity;
+import ca.concordia.moloch.tileentity.moloch.action.Action;
+import ca.concordia.moloch.tileentity.moloch.action.Command;
 import ca.concordia.moloch.tileentity.moloch.desire.Desire;
 import ca.concordia.moloch.tileentity.moloch.progression.Progression;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -131,7 +135,7 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
         flameOffset = Math.min(1, Math.max(0, flameOffset));
 
         // Render flame.
-        this.blit(matrixStack, x + 83, y + 57 + (int)(13 * (1 - flameOffset)), 176, (int) (13 * (1 - flameOffset)), 13, (int) (13 * flameOffset));
+        this.blit(matrixStack, x + 83, y + 57 + (int)(13 * (1.0f - flameOffset)), 176, (int) (13 * (1.0f - flameOffset)), 13, (int) (13 * flameOffset));
     } 
 
     @Override
@@ -144,6 +148,43 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
         int y = (this.height - this.ySize) / 2;
         this.blit(matrixStack, x, y, 0, 0, this.xSize, this.ySize);
 
+        MolochTileEntity tileEntity = this.container.getTitleEntity();
+
+        this.minecraft.getTextureManager().bindTexture(new ResourceLocation("minecraft", "textures/gui/widgets.png"));
+
+        Queue<Action> actionQueue = new LinkedList<Action>();
+
+        actionQueue.add(new Command());
+
+        int yOffset = 0;
+
+        for(int i = 0; i < actionQueue.size(); i++) {
+            this.blit(matrixStack, guiLeft - 24, guiTop + yOffset, 24, 24, 22, 22);
+
+            yOffset += 24;
+        }
+
+        // We can bind our own texture for icons.
+        // this.minecraft.getTextureManager().bindTexture(new ResourceLocation("minecraft", "textures/atlas/mob_effects.png"));
+        
+        yOffset = 0;
+
+        for(Action action : actionQueue) {
+            // We can bind the image texture.
+            // blit(matrixStack, guiLeft - 19, guiTop + 4 + yOffset, 14, 0, 13, 13, 96, 96);
+
+            if(guiLeft - 24 < mouseX && mouseX < guiLeft - 2 && guiTop + yOffset < mouseY && mouseY < guiTop + 22 + yOffset) {
+                List<ITextComponent> lines = new ArrayList<ITextComponent>();
+            
+                lines.add(action.getGUITitle());
+                lines.add(action.getGUIDescription());
+        
+                drawHoveringText(matrixStack, lines, mouseX + guiLeft, mouseY + guiTop);
+            }
+
+            yOffset += 24;
+        }
+        
         drawFlameProgress(matrixStack, x, y);
     }
 }

@@ -5,6 +5,7 @@ import java.util.Random;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -48,8 +49,10 @@ public abstract class Action implements INBTSerializable<CompoundNBT> {
 		this.active = active;
 	}
 
-	abstract public Actions getType();
-	abstract public void run(Vector3d position, String sourceName, ServerWorld world);
+	public abstract Actions getType();
+	public abstract void run(Vector3d position, String sourceName, ServerWorld world);
+	public abstract ITextComponent getGUITitle();
+	public abstract ITextComponent getGUIDescription();
 
 	public boolean isDoInitial() {
 		return doInitial;
