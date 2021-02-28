@@ -32,13 +32,22 @@ In each progression, there is a list of desired items with a desired amount asso
 ```
  * You can remove progressions by index as well:
  `/data remove block <blockPos> progressions[<i>]`
- * Lastly, uoi can update specific fields of a progression:
- `/data modify block <blockPos> progressions[<i>].active set value 1b` (which sets that progression as active... but don't do that till you've set up the desires and rewards/pubishments first!)
+ * Lastly, you can update specific fields of a progression:
+ `/data modify block <blockPos> progressions[<i>].active set value 1b` (which sets that progression as active... but don't do that till you've set up the desires and rewards/punishments first!)
  
 
 
 ### Desires
  * To add desires to the new
-/data modify block <blockPos> progressions[0].rewards prepend value {type: 0, id: 1, doInitial: true, doCountTotal: 1, doCountRemaining: 1, active: 0b, command: "/say REWARD!"}
+/data modify block <blockPos> progressions[0].desires prepend value {id: 1, item: "<item>", amountTotal: 4, amountRemaining: 2}
+```json
+{
+  id: 1L, 
+  item: "minecraft:apple", 
+  amountTotal: 4, 
+  amountRemaining: 2
+}
+```
+As with progressions, the `<id>` should be unique to the desires in this moloch (and progression), but it is not currently checked. The `<item>` should be the id of the item, e.g. `minecraft:apple`, and thus it can support items from modded Minecraft. When active as the current progression, the first three desired items will be visible, along with the `amountRemaining`. An invalid item will show as an "Air" block and will be consumed (I assume @alexandre-lavoie had a fix for that in the old version, but I'm just inclined to make it a bedrock block). `amountTotal` must be a positive integer and will default to `1` if omitted. `amountRemaining` must similarly be a positive integer, and will default to whatever `amountTotal` is if omitted.
 
 ### Rewards/Punishments
