@@ -23,10 +23,11 @@ public class ProgressionInputMapper {
 	}
 
 	private static Progression get(CompoundNBT nbt) {		
+		long start = nbt.contains("start")?nbt.getLong("start"):System.currentTimeMillis();
 		return new Progression(
 			nbt.getLong("id"), 
-			nbt.getLong("start"), 
-			nbt.getLong("end"), 
+			start, 
+			nbt.contains("end")?nbt.getLong("end"):start+(1000*60*60*24*7), 
 			nbt.getBoolean("active"),
 			DesireInputMapper.find(nbt),
 			ActionInputMapper.findRewards(nbt),
