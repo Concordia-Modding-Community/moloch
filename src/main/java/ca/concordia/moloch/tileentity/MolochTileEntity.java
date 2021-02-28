@@ -9,8 +9,7 @@ import ca.concordia.moloch.container.MolochContainer;
 import ca.concordia.moloch.init.ModTileEntities;
 import ca.concordia.moloch.tileentity.moloch.action.Action;
 import ca.concordia.moloch.tileentity.moloch.desire.Desire;
-import ca.concordia.moloch.tileentity.moloch.progression.ProgressionInputMapper;
-import ca.concordia.moloch.tileentity.moloch.progression.ProgressionOutputMapper;
+import ca.concordia.moloch.tileentity.moloch.progression.ProgressionMapper;
 import ca.concordia.moloch.tileentity.moloch.progression.Progression;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerInventory;
@@ -61,7 +60,6 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
 
     public MolochTileEntity(TileEntityType<?> tileEntityType) {
         super(tileEntityType);
-        this.setCustomName(this.getDefaultName());
     }
 
     public String getMolochName() {
@@ -112,7 +110,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         nbt.putString("molochName", this.molochName);
         nbt.putBoolean("active", this.active);
         
-        ProgressionOutputMapper.insert(nbt, progressions);
+        new ProgressionMapper().insert(nbt, progressions);
 
         return nbt;
     }
@@ -139,26 +137,25 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         	this.active = nbt.getBoolean("active");
         }
 
-        if(nbt.contains("progressions")) {
-        	this.progressions = ProgressionInputMapper.find(nbt);
-        }
+        this.progressions = new ProgressionMapper().find(nbt);
         
         this.actionQueue = buildActionQueue();
-        
         this.currentProgression = findCurrentProgression();
     }
 
     private List<Action> buildActionQueue() {
-    	System.out.println("Building Action Queue");
+        System.out.println("Building Action Queue");
+        
         List<Action> newQueue = new ArrayList<Action>();
         
 		for(Progression progression : this.progressions) {
 			if(!progression.isActive() && System.currentTimeMillis() > progression.getStart()) {
-				for(Action a: progression.getRewards()) {
-					if(a.isActive()) newQueue.add(a);
-				}
-				for(Action a: progression.getPunishments()) {
-					if(a.isActive()) newQueue.add(a);
+				for(Action action : progression.getRewards()) {
+					if(action.isActive()) newQueue.add(action);
+                }
+                
+				for(Action action : progression.getPunishments()) {
+					if(action.isActive()) newQueue.add(action);
 				}
 			}
         }
@@ -176,10 +173,10 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     @Override
-	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        super.onDataPacket(net, pkt);
+	public void onDataPacket(NetworkManager networkManager, SUpdateTileEntityPacket packet) {
+        super.onDataPacket(networkManager, packet);
         
-        CompoundNBT tag = pkt.getNbtCompound();
+        CompoundNBT tag = packet.getNbtCompound();
         
 		this.read(tag);
 	}
@@ -221,12 +218,15 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
 
     public void markDirtyServer() {
-    	//We don't need to send a special packet for this, the built in NBT synch crap (getUpdatePacket/onDataPacket) does thsi
+    	//We don't need to send a special packet for this, the built in NBT synch crap (getUpdatePacket/onDataPacket) does this
         this.getWorld().notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), 2);
         this.markDirty();
     }
 
     private void tickClient() {
+        if(currentProgression == null) return;
+        if(!currentProgression.isActive()) return;
+
         World world = this.getWorld();
 
         if (this.world.rand.nextInt(100) < 10) {

@@ -3,6 +3,7 @@ package ca.concordia.moloch.tileentity.moloch.action;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
@@ -11,9 +12,16 @@ import net.minecraft.world.server.ServerWorld;
 public class Command extends Action {
 	private String command;
 	
+	protected Command() {
+		super();
+
+		this.command = "say Nobody told me what to do...";
+	}
+
 	protected Command(long id, boolean doInitial, int doCountTotal, int doCountRemaining, int interval, long variance,
 			long lastRun, boolean active, String command) {
 		super(id, doInitial, doCountTotal, doCountRemaining, interval, variance, lastRun, active);
+
 		this.command = command;
 	}
 
@@ -48,5 +56,21 @@ public class Command extends Action {
         );
 
         world.getServer().getCommandManager().handleCommand(commandSource, this.command);
+	}
+
+	@Override
+	public void deserializeNBT(CompoundNBT nbt) {
+		super.deserializeNBT(nbt);
+
+		if(nbt.contains("command")) this.command = nbt.getString("command");
+	}
+
+	@Override
+	public CompoundNBT serializeNBT() {
+		CompoundNBT nbt = super.serializeNBT();
+		
+		nbt.putString("command", this.getCommand());
+
+		return super.serializeNBT();
 	}
 }
