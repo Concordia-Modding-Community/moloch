@@ -36,7 +36,7 @@ public class ActionOutputMapper {
 		nbt.putInt("doCountTotal", a.getDoCountTotal());
 		nbt.putInt("doCountRemaining", a.getDoCountRemaining());
 		nbt.putInt("interval", a.getInterval());
-		nbt.putInt("variance", a.getVariance());
+		nbt.putLong("variance", a.getVariance());
 		nbt.putLong("lastRun", a.getLastRun());
 		nbt.putBoolean("active", a.isActive());
 		

@@ -18,16 +18,16 @@ public abstract class Action {
 	private int doCountTotal;
 	private int doCountRemaining;
 	private int interval;
-	private int variance;
+	private long variance;
 	private long lastRun;
 	private boolean active;
-	protected Action(long id, boolean doInitial, int doCountTotal, int doCountRemaining, int interval, int variance,
+	protected Action(long id, boolean doInitial, int doCountTotal, int doCountRemaining, int interval, long variance,
 			long lastRun, boolean active) {
 		super();
 		this.id = id;
 		this.doInitial = doInitial;
-		this.doCountTotal = doCountTotal;
-		this.doCountRemaining = doCountRemaining;
+		this.doCountTotal = Math.max(0,doCountTotal);
+		this.doCountRemaining = Math.max(0, doCountRemaining);
 		this.interval = interval;
 		this.variance = variance;
 		this.lastRun = lastRun;
@@ -57,10 +57,10 @@ public abstract class Action {
 	public void setInterval(int interval) {
 		this.interval = interval;
 	}
-	public int getVariance() {
+	public long getVariance() {
 		return variance;
 	}
-	public void setVariance(int variance) {
+	public void setVariance(long variance) {
 		this.variance = variance;
 	}
 	public long getLastRun() {

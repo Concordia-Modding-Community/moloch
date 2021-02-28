@@ -23,7 +23,7 @@ public class Command extends Action {
 	}
 
 
-	protected Command(long id, boolean doInitial, int doCountTotal, int doCountRemaining, int interval, int variance,
+	protected Command(long id, boolean doInitial, int doCountTotal, int doCountRemaining, int interval, long variance,
 			long lastRun, boolean active, String command) {
 		super(id, doInitial, doCountTotal, doCountRemaining, interval, variance, lastRun, active);
 		this.command = command;

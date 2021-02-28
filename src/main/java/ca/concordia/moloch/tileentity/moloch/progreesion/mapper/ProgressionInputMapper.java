@@ -1,9 +1,12 @@
 package ca.concordia.moloch.tileentity.moloch.progreesion.mapper;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import ca.concordia.moloch.tileentity.moloch.action.Action;
 import ca.concordia.moloch.tileentity.moloch.action.ActionInputMapper;
+import ca.concordia.moloch.tileentity.moloch.desire.Desire;
 import ca.concordia.moloch.tileentity.moloch.desire.DesireInputMapper;
 import ca.concordia.moloch.tileentity.moloch.progression.Progression;
 import net.minecraft.nbt.CompoundNBT;
@@ -29,9 +32,9 @@ public class ProgressionInputMapper {
 			start, 
 			nbt.contains("end")?nbt.getLong("end"):start+(1000*60*60*24*7), 
 			nbt.getBoolean("active"),
-			DesireInputMapper.find(nbt),
-			ActionInputMapper.findRewards(nbt),
-			ActionInputMapper.findPunishments(nbt)
+			nbt.contains("desires")?DesireInputMapper.find(nbt):new ArrayList<Desire>(),
+			nbt.contains("rewards")?ActionInputMapper.findRewards(nbt): new ArrayList<Action>(),
+			nbt.contains("punishments")?ActionInputMapper.findPunishments(nbt): new ArrayList<Action>()
 		);
 	}
 	

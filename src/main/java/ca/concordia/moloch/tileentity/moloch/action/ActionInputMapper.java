@@ -27,19 +27,20 @@ public class ActionInputMapper {
 		return acts;
 	}
 
-	private static Action get(CompoundNBT nbt) {		
+	private static Action get(CompoundNBT nbt) {
+		int doCountTotal = nbt.contains("doCountTotal")?nbt.getInt("doCountTotal"):1;
 		switch(Actions.values()[nbt.getInt("type")]) {
 			case COMMAND:
 				return new Command(
 					nbt.getLong("id"), 
-					nbt.getBoolean("doInitial"), 
-					nbt.getInt("doCountTotal"), 
-					nbt.getInt("doCountRemaining"), 
-					nbt.getInt("interval"), 
-					nbt.getInt("variance"), 
+					nbt.contains("doInitial")?nbt.getBoolean("doInitial"):true, 
+					doCountTotal, 
+					nbt.contains("doCountRemaining")?nbt.getInt("doCountRemaining"):doCountTotal, 
+					nbt.contains("interval")?nbt.getInt("interval"):10000, 
+					nbt.getLong("variance"), 
 					nbt.getLong("lastRun"), 
 					nbt.getBoolean("active"), 
-					nbt.getString("command")
+					nbt.contains("command")?nbt.getString("command"):"/say Nobody told me what to do..."
 				);
 		}
 		
