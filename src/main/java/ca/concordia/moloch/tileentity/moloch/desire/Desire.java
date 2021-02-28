@@ -29,7 +29,7 @@ public class Desire {
             itemParser.readItem();
             return itemParser.getItem();
         } catch(Exception e) {
-            return Items.AIR;
+            return Items.BEDROCK;
         }
 	}
 	public void setItem(String item) {

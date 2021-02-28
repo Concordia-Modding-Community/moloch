@@ -10,6 +10,7 @@ import ca.concordia.moloch.tileentity.moloch.desire.Desire;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -64,11 +65,12 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
         int yOffset = 22;
         for(Desire desire : tileEntity.getCurrentProgression().getDesires()) {
         	itemRenderer.renderItemIntoGUI(new ItemStack(() -> desire.getItem(), 1), 113, yOffset-5);
-            if(desire.getAmountRemaining() > 0) {
+        	if(desire.getItem().equals(Items.BEDROCK)) {
+                drawText("err", matrixStack, 135, yOffset - 1, 0xFF4444);
+        	} else if(desire.getAmountRemaining() > 0) {
                 drawText("" + desire.getAmountRemaining(), matrixStack, 136, yOffset);
                 drawText("" + desire.getAmountRemaining(), matrixStack, 135, yOffset - 1, 0xFFFFFF);
             }
-            
             yOffset += 18;
         }
     }
