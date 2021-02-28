@@ -51,6 +51,8 @@ Keep in mind that since this is the vanilla data command, `<targetPos>` can eith
   amountRemaining: 2
 }
 ```
-As with progressions, the `<id>` should be unique to the desires in this moloch (and progression), but it is not currently checked. The `<item>` should be the id of the item, e.g. `minecraft:apple`, and thus it can support items from modded Minecraft. When active as the current progression, the first three desired items will be visible, along with the `amountRemaining`. An invalid item will show as an "Air" block and will be consumed (I assume @alexandre-lavoie had a fix for that in the old version, but I'm just inclined to make it a bedrock block). `amountTotal` must be a positive integer and will default to `1` if omitted. `amountRemaining` must similarly be a positive integer, and will default to whatever `amountTotal` is if omitted.
+As with progressions, the `<id>` should be unique to the desires in this moloch (and progression), but it is not currently checked. The `<item>` should be the id of the item, e.g. `minecraft:apple`, and thus it can support items from modded Minecraft. An invalid bedrock item with a message `err` in red will be shown in the container interface if the item cannot be found (or if you foolishly say that Moloch desires bedrock); note that if this is not corrected, that progression will invariably lead to punishment as mortals may not give Moloch bedrock... 
+
+When active as the current progression, the first three desired items will be visible, along with the `amountRemaining` for each of them. `amountTotal` must be a positive integer and will default to `1` if omitted. `amountRemaining` must similarly be a positive integer, and will default to whatever `amountTotal` is if omitted.
 
 ### Rewards/Punishments
