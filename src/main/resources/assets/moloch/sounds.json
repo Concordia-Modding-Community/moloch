@@ -1,0 +1,7 @@
+{
+  "moloch_breathing": {
+    "category": "block",
+    "subtitle": "moloch.subtitle.moloch_breathing",
+    "sounds": [ "moloch:moloch_breathing" ]
+  }
+}
