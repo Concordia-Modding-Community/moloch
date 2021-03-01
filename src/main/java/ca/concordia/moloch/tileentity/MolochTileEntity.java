@@ -126,7 +126,6 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     @Override
     public CompoundNBT write(CompoundNBT nbt) {
         super.write(nbt);
-        System.out.println("Writing NBT");
 
         if(!this.checkLootAndWrite(nbt)) {
             ItemStackHelper.saveAllItems(nbt, this.contents);
@@ -152,7 +151,6 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
     }
     
     public void read(CompoundNBT nbt) {
-    	System.out.println("Reading NBT");
         this.contents = NonNullList.withSize(this.getSizeInventory(), ItemStack.EMPTY);
 
         if (!this.checkLootAndRead(nbt)) {
@@ -164,27 +162,31 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         }
         
         if(nbt.contains(NBT.SUBJECTS)) {
-        	ListNBT subs = nbt.getList(NBT.SUBJECTS, Constants.NBT.TAG_STRING);
-        	List<UUID> newSubs = new ArrayList<UUID>();
+        	ListNBT subjectListNBT = nbt.getList(NBT.SUBJECTS, Constants.NBT.TAG_STRING);
+        	List<UUID> subjects = new ArrayList<UUID>();
         	
-        	Map<UUID, String> mapRegular = UsernameCache.getMap();
-        	//A quick solution to reverse the map.
-        	//Feb. 28, 2021
-        	//https://stackoverflow.com/a/20412432
+            Map<UUID, String> mapRegular = UsernameCache.getMap();
+            
+            /**
+             * A quick solution to reverse the map.
+             * Feb. 28, 2021
+             * https://stackoverflow.com/a/20412432
+             */
         	Map<Object, Object> mapInversed = 
         			mapRegular.entrySet()
     			       .stream()
-    			       .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-        	for(INBT sub :subs) {
+                       .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+            
+        	for(INBT subjectNBT : subjectListNBT) {
         		try {
-        			if(mapRegular.containsKey(UUID.fromString(sub.getString()))) newSubs.add(UUID.fromString(sub.getString()));
+        			if(mapRegular.containsKey(UUID.fromString(subjectNBT.getString()))) subjects.add(UUID.fromString(subjectNBT.getString()));
         		} catch (IllegalArgumentException e) {
-        			if(mapInversed.containsKey(sub.getString())) newSubs.add((UUID)mapInversed.get(sub.getString()));
+        			if(mapInversed.containsKey(subjectNBT.getString())) subjects.add((UUID)mapInversed.get(subjectNBT.getString()));
         		}
 
-        	}
-        	subjects = newSubs;
-        	System.out.println(Arrays.toString(subjects.toArray()));
+            }
+            
+        	this.subjects = subjects;
         }
 
         this.progressions = new ProgressionMapper().find(nbt);
@@ -393,6 +395,15 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         }
     }
 
+    private void tickSound() {
+        if(currentProgression == null) return;
+
+    	if(System.currentTimeMillis() - lastPlaySound > 25000) {
+    		world.playSound(null, pos, ModSounds.molochBreathe, SoundCategory.BLOCKS, 1.0F, 1F);
+    		lastPlaySound = System.currentTimeMillis() + (long)(Math.random() * 10000L);
+    	}
+    }
+
     private void tickServer() {
         tickConsumption();
 
@@ -403,11 +414,7 @@ public class MolochTileEntity extends LockableLootTileEntity implements ITickabl
         //TODO: Do we want to check this every tic? I think not.
         tickActions();
         
-    	if(System.currentTimeMillis() - lastPlaySound > 15000 + Math.random()*5000) {
-    		System.out.println("Playing sound");
-    		world.playSound(null, pos, ModSounds.molochBreathe, SoundCategory.BLOCKS, 1F, 1F);
-    		lastPlaySound = System.currentTimeMillis();
-    	}
+        tickSound();
     }
 
     @Override
