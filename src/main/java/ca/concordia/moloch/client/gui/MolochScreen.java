@@ -81,10 +81,10 @@ public class MolochScreen extends ContainerScreen<MolochContainer> {
 
         double deltaTime = tileEntity.getCurrentProgression().getEnd() - System.currentTimeMillis();
 
-        lines.add(new StringTextComponent("Day(s): " + (int)(deltaTime / (1000d * 60d * 24d * 365d))));
-        lines.add(new StringTextComponent("Hour(s): " + ((int)(deltaTime / (1000d * 60d * 24d)) % 365)));
-        lines.add(new StringTextComponent("Minute(s): " + ((int)(deltaTime / (1000d * 60d)) % 60)));
-        lines.add(new StringTextComponent("Second(s): " + ((int)(deltaTime / (1000d)) % 60)));
+        lines.add(new StringTextComponent("Day(s): " + (int)(deltaTime / 86400000d)));
+        lines.add(new StringTextComponent("Hour(s): " + (int)(deltaTime / 3600000d % 24)));
+        lines.add(new StringTextComponent("Minute(s): " + (int)(deltaTime / 60000d % 60)));
+        lines.add(new StringTextComponent("Second(s): " + (int)(deltaTime / 1000d % 60)));
 
         drawHoveringText(matrixStack, lines, mouseX, mouseY);
     }
