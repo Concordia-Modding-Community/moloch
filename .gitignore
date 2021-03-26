@@ -28,5 +28,5 @@ forge*changelog.txt
 .vscode
 
 # Images
-images
+/images
 /logs/
