@@ -5,6 +5,7 @@
 <a href="https://github.com/Concordia-Modding-Community/moloch/releases"><img src="https://img.shields.io/badge/Forge-1.16.X-c70039" alt="Supported Versions"></a>
 <a href="https://github.com/Concordia-Modding-Community/moloch/releases"><img src="https://img.shields.io/github/manifest-json/v/Concordia-Modding-Community/moloch" alt="Versions"></a>
 <a href="https://github.com/Concordia-Modding-Community/moloch/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Concordia-Modding-Community/discochat" alt="License"></a>
+<a href="https://github.com/Concordia-Modding-Community/moloch/actions/workflows/gradle.yml"><img src="https://img.shields.io/github/workflow/status/Concordia-Modding-Community/moloch/Gradle%20Test" alt="Build"></a>
 
 ## Overview
 
