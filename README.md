@@ -1,6 +1,6 @@
 # Moloch
 
-<p align="center"><img src="./.github/images/moloch.png" style="height: 200px" alt="Repo"></p>
+<p align="center"><img src="./.github/images/moloch.png" alt="Repo"></p>
 
 <a href="https://github.com/Concordia-Modding-Community/moloch/releases"><img src="https://img.shields.io/badge/Forge-1.16.X-c70039" alt="Supported Versions"></a>
 <a href="https://github.com/Concordia-Modding-Community/moloch/releases"><img src="https://img.shields.io/github/manifest-json/v/Concordia-Modding-Community/moloch" alt="Versions"></a>
@@ -8,13 +8,50 @@
 
 ## Overview
 
+Moloch is a modernism mod that aims to incorporate [Moloch](https://en.wikipedia.org/wiki/Moloch) into Minecraft. We draw close inspiration to the industrial Moloch found in [Metropolis (1927 film)](https://en.wikipedia.org/wiki/Metropolis_(1927_film)). This mod incorporates customizeable blocks/structures that allows for a tyrant/capitalist rule. These are respresented as operator desires, which can lead in either rewards or punishments on the workers.
+
+<p align="center"><img src="./.github/images/environment.png" alt="GUI"></p>
+
 ## Features
+
+Moloch incorporates (including many others) the following:
+
+- Highly customizeable progressions, desires, and rewards/punishments.
+- Compability with most other mods.
+- Teams support.
+- Singleplayer + Multiplayer support.
 
 ## For Workers
 
+The following sections outlines how to use Moloch as a worker. 
+
+### Overview
+
+Moloch is the all seeing and all-consuming tyrant ruler. He will request from you a selection of items over time. You may choose to ignore his requests, but doing so will lead to punishments. Following orders will provide you with a reward (which may be simply not getting a punishment). The operator will choose how miserable he wants to make your existence.
+
+### Moloch UI
+
+You can access Moloch's interface by right-clicking on `Moloch's Heart`. The following image is the labelled interface. It is similar to a vanilla furnace. 
+
+<p align="center"><img src="./.github/images/worker_gui.png" alt="GUI"></p>
+
+#### Inventory
+
+The left slot is the input. This allows you to drop items to fulfill Moloch's desires. You can place items into this slot through hoppers (or other dropping block).
+
+#### Time
+
+The fire represents the amount of time remaining before punishment(s). You can hover the flame to get the time remaining in textual form.
+
+#### Desires
+
+The right slots are Moloch's desires. These can be any valid Forge item. The amount for these will deminish as they consume from the inventory slot. The order does not matter.
+
 ## For Operators
 
-All times are in miliseconds from the epoch, so use `1614449380570lL` notation for starts and ends. `interval` is small enough that you can just put an unmarked number, but `variance` should use the `L` notation as the desired standard deviation will be the square of the variance.
+The following sections will provide information/commands for operating the Moloch block. There may eventually be a user interface to streamline the creation process.
+
+Assume that all times are in miliseconds from the epoch, so use `1614449380570lL` notation for starts and ends. `interval` is small enough that you can just put an unmarked number, but `variance` should use the `L` notation as the desired standard deviation will be the square of the variance.
 
 ### Moloch
 
@@ -51,7 +88,7 @@ Since the moloch block is a container, it contains a list of `Items`.
 
 #### Usage
 
-where `<item>` is any item id and `<amount>` is a stack size, though all this is subject to the regular container restrictions (it'll ignore trying to append with other slots). Keep in mind that since this is the vanilla data command, `<targetPos>` can either be x, y, z coodinates or any of the usual target selectors.
+The following is the usage for the moloch block. Assume that `<item>` is any item id and `<amount>` is a stack size, though all this is subject to the regular container restrictions (it'll ignore trying to append with other slots). Keep in mind that since this is the vanilla data command, `<targetPos>` can either be x, y, z coodinates or any of the usual target selectors.
 
 ##### Inspect Data
 
@@ -141,7 +178,7 @@ For now, the `desires`, `rewards` and `punishments` act as placeholder, defaulti
 
 #### Usage
 
-where `<i>` is the 0-based index of the progression you want to inspect.
+The following section is the usage. Assume that `<i>` is the 0-based index of the progression you want to inspect.
 
 ##### Adding Progression
 
