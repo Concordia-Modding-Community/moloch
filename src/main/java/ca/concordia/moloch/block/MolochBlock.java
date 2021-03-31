@@ -18,7 +18,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class MolochBlock extends Block {
     public MolochBlock() {
-        super(Block.Properties.create(Material.ROCK).hardnessAndResistance(100).setLightLevel(blockState -> 1));
+        super(Block.Properties.create(Material.ROCK).hardnessAndResistance(-1.0F, 3600000.0F).slipperiness(0.8f).noDrops().setLightLevel(blockState -> 1));
     }
 
     @Override
